@@ -1,4 +1,5 @@
 # The URL the site will be built for
+theme = "cereal"
 author = "atp"
 base_url = "https://example.com"
 title = "cereal theme"
