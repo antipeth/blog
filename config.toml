@@ -26,9 +26,5 @@ menu = [
     { name = "/links", url = "/links", weight = 3 },
     { name = "/about", url = "/about", weight = 4 },
 ]
-social = [
-    { name = "github", url = "https://github.com/", weight = 1 },
-    { name = "twitter", url = "https://twitter.com/", weight = 2 },
-    { name = "matrix", url = "https://matrix.to/", weight = 3 },
-]
+social = [{ name = "github", url = "https://github.com/antipeth", weight = 1 }]
 toc = true
