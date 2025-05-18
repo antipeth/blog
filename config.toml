@@ -1,16 +1,33 @@
 # The URL the site will be built for
+author = "atp"
 base_url = "https://example.com"
-
+title = "cereal theme"
+description = "A simple blog theme designed for personal blogs"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
+minify_html = true
 
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = false
 
+generate_feeds = true
+
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = false
+highlight_code = true
 
 [extra]
 # Put all your custom variables here
+menu = [
+    { name = "/home", url = "/", weight = 1 },
+    { name = "/posts", url = "/posts", weight = 2 },
+    { name = "/links", url = "/links", weight = 3 },
+    { name = "/about", url = "/about", weight = 4 },
+]
+social = [
+    { name = "github", url = "https://github.com/", weight = 1 },
+    { name = "twitter", url = "https://twitter.com/", weight = 2 },
+    { name = "matrix", url = "https://matrix.to/", weight = 3 },
+]
+toc = true
