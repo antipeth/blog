@@ -1,9 +1,9 @@
 # The URL the site will be built for
 theme = "cereal"
 author = "atp"
-base_url = "https://example.com"
-title = "cereal theme"
-description = "A simple blog theme designed for personal blogs"
+base_url = "https://blog.0pt.icu"
+title = "世纪大道"
+description = "你在世纪大道东门"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 minify_html = true
