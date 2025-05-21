@@ -1,0 +1,3 @@
+[submodule "themes/cereal"]
+	path = themes/cereal
+	url = https://github.com/antipeth/cereal.git
