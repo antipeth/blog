@@ -1,0 +1,102 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>第七回，探FreeBSD路途远，坎坷荆棘勇前行</h1><span>2024-10-21</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/linux-trip-7/#freebsdde-ji-ben-pei-zhi-yu-hyprlandan-zhuang>FreeBSD的基本配置与hyprland安装</a> <ul><li><a href=https://blog.0pt.icu/posts/linux-trip-7/#geng-xin-xi-tong>更新系统</a><li><a href=https://blog.0pt.icu/posts/linux-trip-7/#an-zhuang-xorgyu-hyprland>安装xorg与hyprland</a></ul></ul></div><h1 id=freebsdde-ji-ben-pei-zhi-yu-hyprlandan-zhuang>FreeBSD的基本配置与hyprland安装</h1><p>2024-10-21<h2 id=geng-xin-xi-tong>更新系统</h2><p>先以root身份登陆，因为没有sudo，所以普通用户不能获得管理员权限，后面会安装<pre style=color:#c0c5ce;background-color:#2b303b><code><span>pkg update
+</span></code></pre><p>在这一布可能会遇见问题，报错如下<pre style=color:#c0c5ce;background-color:#2b303b><code><span>admin@freebsd ~> sudo pkg install inxi
+</span><span>Updating FreeBSD repository catalogue...
+</span><span>pkg: No SRV record found for the repo 'FreeBSD'
+</span><span>pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.pkg -- pkg+:// implies SRV mirror type
+</span><span>pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.txz -- pkg+:// implies SRV mirror type
+</span><span>Unable to update repository FreeBSD
+</span><span>Error updating repositories!
+</span><span>
+</span><span>admin@freebsd ~ [3]> pkg search inxi
+</span><span>pkg: Repository FreeBSD missing. 'pkg update' required
+</span><span>pkg: Repository FreeBSD cannot be opened. 'pkg update' required
+</span><span>
+</span><span>admin@freebsd ~ [1]> sudo pkg update
+</span><span>Updating FreeBSD repository catalogue...
+</span><span>pkg: No SRV record found for the repo 'FreeBSD'
+</span><span>Fetching meta.conf: 100%    163 B   0.2kB/s    00:01    
+</span><span>pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.pkg -- pkg+:// implies SRV mirror type
+</span><span>pkg: packagesite URL error for pkg+http://pkg.FreeBSD.org/FreeBSD:13:amd64/quarterly/packagesite.txz -- pkg+:// implies SRV mirror type
+</span><span>Unable to update repository FreeBSD
+</span><span>Error updating repositories!
+</span></code></pre><p>提取报错，就是找不到pkg源的SRV记录<pre style=color:#c0c5ce;background-color:#2b303b><code><span>pkg: No SRV record found for the repo 'FreeBSD'
+</span></code></pre><p><a href=https://forums.freebsd.org/threads/problems-with-pkg-1-20-8.90655/>problems with pkg 1.20.8 | The FreeBSD Forums</a> 解决方法如下<pre class=language-sh data-lang=sh style=color:#c0c5ce;background-color:#2b303b><code class=language-sh data-lang=sh><span style=color:#bf616a>mkdir -p</span><span> /usr/local/etc/pkg/repos
+</span><span style=color:#bf616a>cp</span><span> /etc/pkg/FreeBSD.conf /usr/local/etc/pkg/repos/
+</span><span style=color:#bf616a>vi</span><span> /usr/local/etc/pkg/repos/FreeBSD.conf
+</span></code></pre><p>将：<pre class=language-FreeBSD.conf data-lang=FreeBSD.conf style=color:#c0c5ce;background-color:#2b303b><code class=language-FreeBSD.conf data-lang=FreeBSD.conf><span># $FreeBSD$
+</span><span>#
+</span><span># To disable this repository, instead of modifying or removing this file,
+</span><span># create a /usr/local/etc/pkg/repos/FreeBSD.conf file:
+</span><span>#
+</span><span>#   mkdir -p /usr/local/etc/pkg/repos
+</span><span>#   echo "FreeBSD: { enabled: no }" > /usr/local/etc/pkg/repos/FreeBSD.conf
+</span><span>#
+</span><span>
+</span><span>FreeBSD: {
+</span><span>  url: "pkg+http://pkg.FreeBSD.org/${ABI}/quarterly",
+</span><span>  mirror_type: "srv",
+</span><span>  signature_type: "fingerprints",
+</span><span>  fingerprints: "/usr/share/keys/pkg",
+</span><span>  enabled: yes
+</span><span>}
+</span></code></pre><p>改为：<pre class=language-FreeBSD.conf data-lang=FreeBSD.conf style=color:#c0c5ce;background-color:#2b303b><code class=language-FreeBSD.conf data-lang=FreeBSD.conf><span># $FreeBSD$
+</span><span>#
+</span><span># To disable this repository, instead of modifying or removing this file,
+</span><span># create a /usr/local/etc/pkg/repos/FreeBSD.conf file:
+</span><span>#
+</span><span>#   mkdir -p /usr/local/etc/pkg/repos
+</span><span>#   echo "FreeBSD: { enabled: no }" > /usr/local/etc/pkg/repos/FreeBSD.conf
+</span><span>#
+</span><span>
+</span><span>FreeBSD: {
+</span><span>  url: "http://pkg.FreeBSD.org/${ABI}/quarterly",
+</span><span>  mirror_type: "http",
+</span><span>  signature_type: "fingerprints",
+</span><span>  fingerprints: "/usr/share/keys/pkg",
+</span><span>  enabled: yes
+</span><span>}
+</span></code></pre><p>这是官方管理员给出的解决方案。 再执行更新<pre style=color:#c0c5ce;background-color:#2b303b><code><span>pkg update
+</span></code></pre><p>安装sudo<pre class=language-sh data-lang=sh style=color:#c0c5ce;background-color:#2b303b><code class=language-sh data-lang=sh><span style=color:#bf616a>pw</span><span> groupmod wheel</span><span style=color:#bf616a> -m</span><span> username
+</span><span style=color:#bf616a>pkg</span><span> install sudo
+</span><span style=color:#bf616a>visudo
+</span></code></pre><p>接下来弹出vi编辑器，在其中找到<pre class=language-sh data-lang=sh style=color:#c0c5ce;background-color:#2b303b><code class=language-sh data-lang=sh><span style=color:#65737e>## Same thing without a password
+</span></code></pre><p>把下面那行的注释取消(就是下面那行的#号删掉，使用hjkl移到到那个需要删除的位置，按x，就可以删除光标所在的字符)。然后按<code>ESC</code>,再输入<code>:wq</code>保存并退出。 然后就可以使用sudo了，这是可以使用<pre style=color:#c0c5ce;background-color:#2b303b><code><span>exit # 注销当前用户，重新以之前创建的普通用户身份登录
+</span></code></pre><p>或者<pre style=color:#c0c5ce;background-color:#2b303b><code><span>su admin # 切换回之前创建的普通用户admin
+</span></code></pre><p>接下来均以普通用户admin进行操作 我的成功安装xorg与hyprland且可正常使用的平台<ol><li>S410p笔记本<li>e5-2651v2+R9 270/HD7750+pve虚拟机(q35机型)<li>天选4 i7 13700H + 混合显卡输出模式(实际上仅用核显)<li>A520 + R5 5600G核显</ol><h2 id=an-zhuang-xorgyu-hyprland>安装xorg与hyprland</h2><h3 id=an-zhuang-dui-ying-qu-dong>安装对应驱动</h3><h4 id=intelxian-qia>intel显卡</h4><pre style=color:#c0c5ce;background-color:#2b303b><code><span>sudo pkg install drm-kmod
+</span><span># sudo pkg install xf86-video-intel # 可选
+</span><span>sudo sysrc kld_list+=i915kms
+</span></code></pre><h4 id=amdhe-xian-du-xian>amd核显/独显</h4><pre style=color:#c0c5ce;background-color:#2b303b><code><span>sudo pkg install drm-kmod
+</span><span># sudo pkg install xf86-video-intel # 可选
+</span><span>sudo sysrc kld_list+=amdgpu # 对于 HD7000 之后或 Tahiti 图形卡
+</span><span>sudo sysrc kld_list+=radeonkms # 对于较旧的显卡（HD7000 之前或 Tahiti 之前）
+</span></code></pre><h4 id=nvidiadu-xian-dui-yu-jiao-xin-de-xian-qia>nvidia独显（对于较新的显卡）</h4><pre style=color:#c0c5ce;background-color:#2b303b><code><span>sudo pkg install nvidia-driver
+</span><span>sudo sysrc kld_list+=nvidia-modeset
+</span></code></pre><h4 id=nvidiadu-xian-dui-yu-jiao-jiu-de-xian-qia>nvidia独显（对于较旧的显卡）</h4><p>https://docs.freebsd.org/en/books/handbook/x11/#x-graphic-card-drivers 直接看文档吧<h3 id=an-zhuang-ruan-jian-bao-bing-qi-yong-xi-tong-fu-wu>安装软件包并启用系统服务</h3><pre style=color:#c0c5ce;background-color:#2b303b><code><span>sudo pw groupmod video -m username
+</span><span>sudo pkg install xorg dbus sddm wayland seatd hyprland xdg-desktop-portal-hyprland # hyprland本体
+</span><span>sudo pkg install alacritty waybar pavucontrol yazi rofi-wayland git neovim wl-clipboard # 常用工具
+</span><span>sudo sysrc dbus_enable="YES"
+</span><span>sudo sysrc sddm_enable="YES"
+</span><span>sudo sysrc hald_enable="YES"
+</span><span>sudo sysrc seatd_enable="YES"
+</span><span>sudo sysrc jackd_enable="YES"
+</span><span>sudo sysrc linux_enable="YES" # 配置linux兼容
+</span></code></pre><p>运行后输入<pre style=color:#c0c5ce;background-color:#2b303b><code><span>sudo reboot
+</span></code></pre><p>重启系统，如果运气好，可以直接进入sddm，并且sddm上面的会话会显示Hyprland，这种情况就是非常成功<h3 id=bao-cuo-1-xdg-runtime-dir-is-not-set>报错1：<code>XDG_RUNTIME_DIR is not set</code></h3><p>可能会遇见报错<code>XDG_RUNTIME_DIR is not set</code> 在 shell 的 rc 文件中添加以下内容（例如 .shrc、.bashrc）：<pre style=color:#c0c5ce;background-color:#2b303b><code><span>export XDG_RUNTIME_DIR=/var/run/user/`id -u``
+</span></code></pre><p>这个在freebsd14.1中已经解决，会自动帮你设置<h3 id=bao-cuo-2-virtulboxxu-ni-ji-kai-bu-qi-lai-hyprlandyu-xorg>报错2：virtulbox虚拟机开不起来hyprland与xorg</h3><p>hyprland貌似解决不了 <a href=https://wiki.hyprland.org/Getting-Started/Quick-start/>Quick Start | Hyprland Wiki</a> 官方说hyprland无法运行在虚拟机里面。 xorg的话 vbox虚拟机无法启动xorg，提示找不到显示器，那是因为没装显示驱动。 记得先在vbox设置把显示-显卡控制器改为VBoxSVGA 然后执行<pre style=color:#c0c5ce;background-color:#2b303b><code><span>pkg install virtualbox-ose-additions-6.1.50
+</span><span>
+</span><span>startx # 检验是否可以开启xorg
+</span></code></pre><h3 id=bao-cuo-3-ping-tai-shi-lao-shi-ying-te-er-bi-ji-ben-huan-shi-wu-fa-kai-qi-xorg>报错3：平台是老式英特尔笔记本，还是无法开启xorg</h3><p>如果还不行，运行<pre style=color:#c0c5ce;background-color:#2b303b><code><span>Xorg -configure
+</span></code></pre><p>将生成的xorg.conf.new复制走<pre style=color:#c0c5ce;background-color:#2b303b><code><span>cp xorg.conf.new /usr/local/etc/X11/xorg.conf.d/xorg.conf
+</span><span>vi /usr/local/etc/X11/xorg.conf.d/xorg.conf
+</span></code></pre><p>将里面Device部分的Driver项改成对应的模块<a href=https://docs.freebsd.org/en/books/handbook/x11/#x-graphic-card-drivers>Chapter 5. The X Window System | FreeBSD Documentation Portal</a> 几个论坛的例子 <a href=https://forums.freebsd.org/threads/startx-bad-display-name.8003/>startX bad display name | The FreeBSD Forums</a><a href=https://forums.freebsd.org/threads/startx-bad-display-name.8003/>startX bad display name | The FreeBSD Forums</a> <a href=https://forums.freebsd.org/threads/thinkpad-e130-hd-4000-failed-to-load-module-intel.72048/>Solved - Thinkpad E130 - HD 4000 - Failed to load module "intel" | The FreeBSD Forums</a><h3 id=bao-cuo-4-ping-tai-13dai-ying-te-er-rtx-4060bi-ji-ben-wu-fa-kai-qi-xorghuo-wayland>报错4：平台13代英特尔+RTX 4060笔记本，无法开启xorg或wayland</h3><p>测试，在bios使用核显独显混合模式，根据官方文档进行配置，无法使用wayland 需要修改xorg配置文件,才能正常运行xorg 修改<code>/usr/local/etc/X11/xorg.conf.d/xorg.conf</code>里面的配置文件 找到如下intel核显驱动的<code>Section</code>部分<pre class=language-xorg.conf data-lang=xorg.conf style=color:#c0c5ce;background-color:#2b303b><code class=language-xorg.conf data-lang=xorg.conf><span>Section "Device"
+</span><span>	Identifier "Card0"
+</span><span>	Driver     "intel"
+</span><span>EndSection
+</span></code></pre><p>将这部分修改为<pre class=language-xorg.conf data-lang=xorg.conf style=color:#c0c5ce;background-color:#2b303b><code class=language-xorg.conf data-lang=xorg.conf><span>Section "Device"
+</span><span>	Identifier "Intel Graphics"
+</span><span>	Driver     "intel"
+</span><span>EndSection
+</span></code></pre><p>重启，xorg正常，能明显感到核显被成功驱动 wayland也正常<p>在bios使用独显模式，无法开启xorg 这是硬件兼容的问题，无解，最好不要使用笔记本独显的设备</div>

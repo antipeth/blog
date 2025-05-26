@@ -1,0 +1,28 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>使用tebi作为s3,搭建nix缓存服务器</h1><span>2024-11-12</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server/#shi-yong-tebizuo-wei-s3-da-jian-nixhuan-cun-fu-wu-qi>使用tebi作为s3,搭建nix缓存服务器</a> <ul><li><a href=https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server/#shi-yong-tebizuo-wei-s3-provider>使用tebi作为s3 provider</a><li><a href=https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server/#chuang-jian-s3tong-xing-zheng>创建s3通行证</a><li><a href=https://blog.0pt.icu/posts/server-use-tebi-build-nixos-cache-server/#shang-chuan-huan-cun>上传缓存</a></ul></ul></div><h1 id=shi-yong-tebizuo-wei-s3-da-jian-nixhuan-cun-fu-wu-qi>使用tebi作为s3,搭建nix缓存服务器</h1><p>2024-11-12 参考<ol><li>https://nixos-and-flakes.thiscute.world/zh/nix-store/host-your-own-binary-cache-server</ol><h2 id=shi-yong-tebizuo-wei-s3-provider>使用tebi作为s3 provider</h2><p>进入s3 创建桶your-bucket-name 创建access_key/secret_access_key<p>直接上传<code>nix-cache-info</code> 文件到桶的根目录，文件内容如下<pre class=language-nix-cache-info data-lang=nix-cache-info style=color:#c0c5ce;background-color:#2b303b><code class=language-nix-cache-info data-lang=nix-cache-info><span>StoreDir: /nix/store
+</span><span>WantMassQuery: 1
+</span><span>Priority: 40
+</span></code></pre><h2 id=chuang-jian-s3tong-xing-zheng>创建s3通行证</h2><p>转到nixos上,创建<code>~/.aws/credentials</code>,内容如下<pre class=language-credentials data-lang=credentials style=color:#c0c5ce;background-color:#2b303b><code class=language-credentials data-lang=credentials><span>[config-name]
+</span><span>aws_access_key_id=&LTyour_access_key>
+</span><span>aws_secret_access_key=&LTyour_secret_access_key>
+</span></code></pre><p>这里的<code>&LTyour_access_key></code>和<code>&LTyour_secret_access_key></code>去tebi后台找<h2 id=shang-chuan-huan-cun>上传缓存</h2><h3 id=chuang-jian-mi-yao-dui>创建密钥对</h3><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix</span><span> key generate-secret</span><span style=color:#bf616a> --key-name</span><span> your-want-name-1 > </span><span style=color:#bf616a>~</span><span>/.config/nix/secret.key
+</span><span style=color:#bf616a>nix</span><span> key convert-secret-to-public < </span><span style=color:#bf616a>~</span><span>/.config/nix/secret.key > </span><span style=color:#bf616a>~</span><span>/.config/nix/public.key
+</span><span style=color:#bf616a>cat ~</span><span>/.config/nix/public.key
+</span><span style=color:#65737e># => your-want-name-1:m0J/oDlLEuG6ezc6MzmpLCN2MYjssO3NMIlr9JdxkTs=
+</span></code></pre><blockquote><p>名字是任意的，推荐后面加上版本号</blockquote><h3 id=tui-song-cun-chu-lu-jing-dao-er-jin-zhi-huan-cun>推送存储路径到二进制缓存</h3><p>先给本地存储路径签名<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix</span><span> store sign</span><span style=color:#bf616a> --recursive --key-file ~</span><span>/.config/nix/secret.key /run/current-system
+</span></code></pre><p>将这些路径复制到缓存<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix</span><span> copy</span><span style=color:#bf616a> --to </span><span>'</span><span style=color:#a3be8c>s3://your-bucket-name?profile=config-name&endpoint=s3.tebi.io</span><span>' /run/current-system
+</span></code></pre><h3 id=tian-jia-zhe-ge-huan-cun-yuan>添加这个缓存源</h3><p>将以下内容放入 configuration.nix 或您的任何自定义 NixOS 模块中<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span>{
+</span><span>  </span><span style=color:#bf616a>nix</span><span> = {
+</span><span>    settings = {
+</span><span>      extra-substituters = [
+</span><span>        "</span><span style=color:#a3be8c>https://s3.tebi.io/your-bucket-name/</span><span>"
+</span><span>      ];
+</span><span>      extra-trusted-public-keys = [
+</span><span>        "</span><span style=color:#a3be8c>your-want-name-1:m0J/oDlLEuG6ezc6MzmpLCN2MYjssO3NMIlr9JdxkTs=</span><span>"
+</span><span>      ];
+</span><span>    };
+</span><span>  };
+</span><span>}
+</span></code></pre><p>参考: https://nixos-and-flakes.thiscute.world/zh/nix-store/host-your-own-binary-cache-server https://fzakaria.com/2020/07/15/setting-up-a-nix-s3-binary-cache.html</div>

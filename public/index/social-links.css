@@ -1,0 +1,1 @@
+.social-links{display:flex;gap:1rem;margin-top:1rem;font-size:.9rem;justify-content:center;flex-wrap:wrap}.social-links a{color:var(--text-color);text-decoration:none;padding:.25rem .5rem;border-radius:4px;transition:all .3s ease}.social-links a:hover{background-color:var(--bg-secondary);color:var(--accent-color)}

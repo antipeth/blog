@@ -1,0 +1,77 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>第二回，初入KDE虚界间，安装APPS耀目光</h1><span>2024-02-07</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#di-er-hui-chu-ru-kdexu-jie-jian-an-zhuang-appsyao-mu-guang>第二回，初入KDE虚界间，安装APPS耀目光</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#1-ji-ben>1.基本</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#an-zhuang-fcitx5-rimeshu-ru-fa>安装fcitx5-rime输入法</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#an-zhuang-nvidiaxian-qia-qu-dong>安装NVIDIA显卡驱动</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#pei-zhi-btrfs>配置btrfs</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#vscodiumgeng-huan-guan-fang-cha-jian-yuan>vscodium更换官方插件源</a><li><a href=https://blog.0pt.icu/posts/linux-trip-2/#pei-zhi-wayland>配置Wayland</a></ul></div><h1 id=di-er-hui-chu-ru-kdexu-jie-jian-an-zhuang-appsyao-mu-guang>第二回，初入KDE虚界间，安装APPS耀目光</h1><p>2024-02-07<h1 id=1-ji-ben>1.基本</h1><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>systemctl</span><span> stop reflector.service
+</span><span style=color:#bf616a>systemctl</span><span> disable reflector.service
+</span><span style=color:#bf616a>eos-update </span><span style=color:#65737e># EndeavourOS更新命令
+</span><span style=color:#bf616a>sudo</span><span> pacman</span><span style=color:#bf616a> -S</span><span> paru </span><span style=color:#65737e># Aur 助手
+</span><span style=color:#bf616a>paru -Syyu
+</span><span style=color:#bf616a>paru -S</span><span> pacman-contrib
+</span><span style=color:#bf616a>paru -S</span><span> discover </span><span style=color:#65737e># 应用中心
+</span><span style=color:#bf616a>upar -S</span><span> filelight </span><span style=color:#65737e># 磁盘管理器
+</span><span style=color:#bf616a>paru -S</span><span> marktext-bin </span><span style=color:#65737e># markdown编辑器
+</span><span style=color:#bf616a>paru -S</span><span> octopi </span><span style=color:#65737e># 可视化界面管理包管理器
+</span><span style=color:#bf616a>paru -S</span><span> bauh </span><span style=color:#65737e># 可视化界面管理包管理器
+</span><span style=color:#bf616a>paru -S</span><span> brave-bin </span><span style=color:#65737e># 浏览器
+</span><span style=color:#bf616a>paru -S</span><span> keepassxc </span><span style=color:#65737e># 密码管理器
+</span><span style=color:#bf616a>paru -S</span><span> bitwarden </span><span style=color:#65737e># 密码管理器
+</span><span style=color:#bf616a>paru -S</span><span> libreoffice-still libreoffice-still-zh-cn </span><span style=color:#65737e># 文档编辑器
+</span><span style=color:#bf616a>paru -S</span><span> firefox-developer-edition </span><span style=color:#65737e># 浏览器
+</span><span style=color:#bf616a>paru -S</span><span> vlc </span><span style=color:#65737e># 音视频播放器
+</span><span style=color:#bf616a>paru -S</span><span> thunderbird thunderbird-i18n-zh-cn </span><span style=color:#65737e># 邮箱
+</span><span style=color:#bf616a>paru -S</span><span> obs-studio </span><span style=color:#65737e># 录屏软件
+</span><span style=color:#bf616a>paru -S</span><span> schildichat-desktop-bin </span><span style=color:#65737e># matrix聊天软件
+</span><span style=color:#bf616a>paru -S</span><span> tabby-bin </span><span style=color:#65737e># ssh连接工具
+</span><span style=color:#bf616a>paru -S</span><span> vscodium-bin </span><span style=color:#65737e># 代码编辑器
+</span><span style=color:#bf616a>paru -S</span><span> anytype-bin </span><span style=color:#65737e># 笔记软件
+</span><span style=color:#bf616a>paru -S</span><span> joplin-beta-appimage </span><span style=color:#65737e># 笔记软件
+</span></code></pre><h1 id=an-zhuang-fcitx5-rimeshu-ru-fa>安装fcitx5-rime输入法</h1><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>paru -S</span><span> fcitx5-im
+</span><span style=color:#bf616a>paru -S</span><span> fcitx5-material-color
+</span><span style=color:#bf616a>paru -S</span><span> fcitx5-rime
+</span><span style=color:#bf616a>paru -S</span><span> ruby
+</span></code></pre><p>这里直接使用自动部署脚本。<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>git</span><span> clone</span><span style=color:#bf616a> --depth</span><span>=1 https://github.com/Mark24Code/rime-auto-deploy.git</span><span style=color:#bf616a> --branch</span><span> latest
+</span><span style=color:#96b5b4>cd</span><span> rime-auto-deploy
+</span><span style=color:#bf616a>./installer.rb
+</span></code></pre><p><img alt src=https://img.0pt.icu/learn/linux-trip/2/1.png><p>输入3回车。<p><img alt src=https://img.0pt.icu/learn/linux-trip/2/2.png><p>输入1回车。<p>然后在<code>/etc/environment</code> 文件末尾添加：<pre class=language-/etc/environment data-lang=/etc/environment style=color:#c0c5ce;background-color:#2b303b><code class=language-/etc/environment data-lang=/etc/environment><span>export GTK_IM_MODULE=fcitx5
+</span><span>
+</span><span>export QT_IM_MODULE=fcitx5
+</span><span>
+</span><span>export XMODIFIERS=@im=fcitx5
+</span></code></pre><p>保存后退出，重启电脑之后，输入法就可以用了。<h1 id=an-zhuang-nvidiaxian-qia-qu-dong>安装NVIDIA显卡驱动</h1><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>paru -S</span><span> nvidia-inst
+</span><span style=color:#bf616a>nvidia-inst --drivers
+</span></code></pre><p><img alt src=https://img.0pt.icu/learn/linux-trip/2/3.png><p>需要等一会，不要着急。<p><img alt src=https://img.0pt.icu/learn/linux-trip/2/4.png><p>这里我的<code>series</code>是<code>545</code><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nvidia-inst --series</span><span> 545</span><span style=color:#bf616a> -t
+</span></code></pre><p>将<code>--series</code>参数后面的<code>545</code>改为你自己的<code>series</code><p>例如以<code>390</code>为例，就是<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span> </span><span style=color:#bf616a>nvidia-inst --series</span><span> 390</span><span style=color:#bf616a> -t
+</span></code></pre><p><img alt src=https://img.0pt.icu/learn/linux-trip/2/5.png><p>将其中的这个：<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>COMMANDS</span><span> TO RUN:
+</span><span>    </span><span style=color:#bf616a>pacman -Rs --noconfirm --noprogressbar --nodeps</span><span> nvidia-dkms nvidia-hook nvidia-utils
+</span><span>    </span><span style=color:#bf616a>yay -Syu</span><span> nvidia-390xx-dkms nvidia-390xx-utils nvidia-390xx-settings
+</span></code></pre><p>里面的COMMANDS TO RUN给出的命令执行就可以安装显卡驱动。<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>pacman -Rs --noconfirm --noprogressbar --nodeps</span><span> nvidia-dkms nvidia-hook nvidia-utils
+</span><span style=color:#bf616a>yay -Syu</span><span> nvidia-390xx-dkms nvidia-390xx-utils nvidia-390xx-settings
+</span></code></pre><p>等待安装。<p>安装后执行：<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nvidia-smi
+</span></code></pre><p>来查看显卡驱动有没有正确安装。执行后有如下输出则证明显卡驱动安装成功。<p><img alt src=https://img.0pt.icu/learn/linux-trip/2/6.png><h1 id=pei-zhi-btrfs>配置btrfs</h1><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>paru -S</span><span> snapper
+</span><span style=color:#bf616a>paru -S</span><span> snap-pac
+</span><span style=color:#bf616a>paru -S</span><span> grub-btrfs
+</span><span style=color:#bf616a>paru -S</span><span> btrfs-assistant
+</span><span style=color:#bf616a>paru -S</span><span> btrfsmaintenance
+</span><span style=color:#bf616a>paru -S</span><span> snap-pac-grub
+</span></code></pre><p>然后，请先打开一下 Btrfs Assistant 这个应用，退出后再运行下面这个：<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>paru -S</span><span> snapper-support
+</span></code></pre><h1 id=vscodiumgeng-huan-guan-fang-cha-jian-yuan>vscodium更换官方插件源</h1><p>找到<code>vscodium</code>的安装的文件夹。这里，我的eos的路径是<code>/opt/vscodium-bin</code><p>在<code>/opt/vscodium-bin/resources/app</code> 中找到<code>product.json</code> 这个文件。<p>打开该文件，找到如下内容：<pre class=language-product.json data-lang=product.json style=color:#c0c5ce;background-color:#2b303b><code class=language-product.json data-lang=product.json><span>  "extensionsGallery": {
+</span><span>    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+</span><span>    "itemUrl": "https://open-vsx.org/vscode/item"
+</span><span>  },
+</span></code></pre><p>将其改为：<pre class=language-product.json data-lang=product.json style=color:#c0c5ce;background-color:#2b303b><code class=language-product.json data-lang=product.json><span>    "extensionsGallery": {
+</span><span>        "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
+</span><span>        "itemUrl": "https://marketplace.visualstudio.com/items"
+</span><span>    },
+</span></code></pre><p>保存后重启vscodium，更换完毕。<h1 id=pei-zhi-wayland>配置Wayland</h1><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>paru -S</span><span> wayland
+</span><span style=color:#bf616a>paru -S</span><span> plasma-wayland-session
+</span><span style=color:#bf616a>paru -S</span><span> pipewire
+</span><span style=color:#bf616a>sudo</span><span> cp</span><span style=color:#bf616a> -rp</span><span> /usr/share/pipewire/* /etc/pipewire/
+</span><span style=color:#bf616a>paru -S</span><span> pipewire-pulse
+</span><span style=color:#bf616a>systemctl --user</span><span> enable pipewire.service
+</span><span style=color:#bf616a>systemctl --user</span><span> start pipewire.service
+</span><span style=color:#bf616a>paru -S</span><span> libpipewire
+</span><span style=color:#bf616a>paru -S</span><span> gst-plugin-pipewire
+</span><span style=color:#bf616a>paru -S</span><span> xdg-desktop-portal-kde
+</span><span style=color:#bf616a>paru -S</span><span> wayland-protocols
+</span><span style=color:#bf616a>paru -S</span><span> xdg-desktop-portal-gtk
+</span></code></pre></div>
