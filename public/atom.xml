@@ -5,8 +5,517 @@
     <link rel="self" type="application/atom+xml" href="https://blog.0pt.icu/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://blog.0pt.icu"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2025-07-23T00:00:00+00:00</updated>
+    <updated>2025-09-26T00:00:00+00:00</updated>
     <id>https://blog.0pt.icu/atom.xml</id>
+    <entry xml:lang="en">
+        <title>A770使用体验</title>
+        <published>2025-09-26T00:00:00+00:00</published>
+        <updated>2025-09-26T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              antipeth
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.0pt.icu/posts/hardware-a770-test/"/>
+        <id>https://blog.0pt.icu/posts/hardware-a770-test/</id>
+        
+        <content type="html" xml:base="https://blog.0pt.icu/posts/hardware-a770-test/">&lt;h1 id=&quot;a770shi-yong-ti-yan&quot;&gt;A770使用体验&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;yin&quot;&gt;引&lt;&#x2F;h2&gt;
+&lt;p&gt;8月底把游戏本出了装机，想搞一张能跑ai绘画顺便能打打游戏的显卡。&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;我对显存有要求，至少12G显存。&lt;&#x2F;li&gt;
+&lt;li&gt;性价比高。&lt;&#x2F;li&gt;
+&lt;li&gt;不是特别在意游戏性能。&lt;&#x2F;li&gt;
+&lt;li&gt;不折腾也不要太牢的卡，像Tesla V100，MI50这种的卡也不想要。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;挑显卡时偶然看到了Intel Arc A770 16G在海鲜市场二手价格1200元。以较低价格购买一张16G显存并且比较像样的显卡，是比较有吸引力的。
+主要担心的是，Intel显卡徒有其表，虽然规格看上去很美丽，跑分也很美丽，但实际用起来就不是那么美丽了。
+在参考了&lt;a href=&quot;https:&#x2F;&#x2F;chimolog.co&#x2F;bto-gpu-stable-diffusion-specs&#x2F;&quot;&gt;【Stable Diffusion】AIイラストにおすすめなグラボをガチで検証【GPU別の生成速度】&lt;&#x2F;a&gt;的显卡ai绘画大横评后，我认为A770这张卡看起来还行，于是搞了一张A770公版。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;qu-dong&quot;&gt;驱动&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;windowsqu-dong&quot;&gt;Windows驱动&lt;&#x2F;h3&gt;
+&lt;p&gt;直接官网下载安装即可。我使用最新驱动，如果打游戏，应该去找找之前版本的驱动，因为A770驱动在2025年是负优化居多，而A770的游戏表现比较依赖驱动的优化。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;linuxqu-dong&quot;&gt;Linux驱动&lt;&#x2F;h3&gt;
+&lt;p&gt;正常显示是没问题的，默认使用intel的i915开源驱动。
+以下驱动是为了满足使用A770在Linux上进行计算、推理和跑ai。
+对系统有要求：&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;最好是内核6.0以上(not sure)
+使用以下命令查看。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;uname -r
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;内核带有GuC&#x2F;HuC firmware
+使用以下命令查看。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dmesg &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;grep -i -e &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;huc&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -e &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;guc&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;一般来说，使用比较新的内核都会自动加载。
+没有的话查看&lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;title&#x2F;Intel_graphics#Enable_GuC_&#x2F;_HuC_firmware_loading&quot;&gt;这个&lt;&#x2F;a&gt;来安装和开启。&lt;&#x2F;p&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;
+&lt;p&gt;Intel Compute Runtime
+可能需要用对应系统的包管理器安装。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Level Zero
+可能需要用对应系统的包管理器安装。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h4 id=&quot;ubuntu&quot;&gt;Ubuntu&lt;&#x2F;h4&gt;
+&lt;p&gt;Intel有为他们的显卡在Ubuntu平台上开发驱动。
+应按照此篇&lt;a href=&quot;https:&#x2F;&#x2F;dgpu-docs.intel.com&#x2F;driver&#x2F;client&#x2F;overview.html#ubuntu-latest&quot;&gt;官方教程&lt;&#x2F;a&gt;安装驱动。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;cachyos-arch-fa-xing-ban&quot;&gt;Cachyos (Arch 发行版)&lt;&#x2F;h4&gt;
+&lt;p&gt;正常安装系统后，需要用包管理器安装&lt;code&gt;Intel Compute Runtime&lt;&#x2F;code&gt;和&lt;code&gt;Level Zero&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span&gt; intel-compute-runtime level-zero-loader level-zero-headers
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;qi-ta-linuxfa-xing-ban&quot;&gt;其他Linux发行版&lt;&#x2F;h4&gt;
+&lt;p&gt;没有测试过，检查是否满足4个条件。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;ru-he-jian-cha-qu-dong-shi-fou-an-zhuang-cheng-gong&quot;&gt;如何检查驱动是否安装成功&lt;&#x2F;h4&gt;
+&lt;p&gt;检测是否安装成功可以使用&lt;code&gt;torch.xpu&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;推荐直接使用python venv虚拟环境。我在Ubuntu 24.04.3上面使用conda会识别不到我的A770。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; venv .venv
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span&gt; .venv&#x2F;bin&#x2F;activate
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pip&lt;&#x2F;span&gt;&lt;span&gt; install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --upgrade&lt;&#x2F;span&gt;&lt;span&gt; pip
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pip&lt;&#x2F;span&gt;&lt;span&gt; install torch torchvision torchaudio&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --index-url&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;download.pytorch.org&#x2F;whl&#x2F;xpu
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -c &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;import torch;print(f&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;XPU available: {torch.xpu.is_available()}&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;);print(f&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;Device count: {torch.xpu.device_count()}&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;);print(f&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;Device name: {torch.xpu.get_device_name(0)}&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;);&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;如果xpu可用显示true，arc显卡计数不为0，以及可以显示arc显卡名字，则驱动安装成功。
+如果xpu可用显示flase，arc显卡计数为0，以及不能显示arc显卡名字，则驱动安装失败。需要再检查检查哪里没安装好。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;jiang-i915qu-dong-ti-huan-wei-xequ-dong&quot;&gt;将i915驱动替换为xe驱动&lt;&#x2F;h4&gt;
+&lt;p&gt;i915驱动是linux默认为intel gpu启用的驱动。可以手动切换到xe驱动以提高性能。
+&lt;a href=&quot;https:&#x2F;&#x2F;www.phoronix.com&#x2F;review&#x2F;intel-i915-xe-linux-2025&quot;&gt;该篇文章&lt;&#x2F;a&gt;是2种驱动对比。文章有5页，记得翻页看。&lt;&#x2F;p&gt;
+&lt;p&gt;在arch wiki中也有&lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;title&#x2F;Intel_graphics#Testing_the_new_experimental_Xe_driver&quot;&gt;切换Xe驱动的教程&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h5 id=&quot;jian-cha-qi-yong-xequ-dong-de-qian-zhi-tiao-jian&quot;&gt;检查启用Xe驱动的前置条件&lt;&#x2F;h5&gt;
+&lt;p&gt;来自archwiki&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;linux 6.8 内核及其更新的版本&lt;&#x2F;li&gt;
+&lt;li&gt;Tiger Lake架构(11代酷睿)以及更新的集显, 或者独显。&lt;&#x2F;li&gt;
+&lt;li&gt;mesa.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h6 id=&quot;cha-kan-intel-xian-qia-de-pci-id&quot;&gt;查看intel 显卡的pci id&lt;&#x2F;h6&gt;
+&lt;p&gt;看看自己的intel显卡是否支持xe驱动&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lspci -k &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;grep -EA3 &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;VGA|3D|Display&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;我的示例如下，可以看到Kernel modules: i915, xe,支持i915和xe。
+当前使用的是i915。&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;03:00.0 VGA compatible controller: Intel Corporation DG2 [Arc A770] (rev 08)
+&lt;&#x2F;span&gt;&lt;span&gt;    Subsystem: Intel Corporation Device 1020
+&lt;&#x2F;span&gt;&lt;span&gt;    Kernel driver in use: i915
+&lt;&#x2F;span&gt;&lt;span&gt;    Kernel modules: i915, xe
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;查看pci id：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lspci -nnd&lt;&#x2F;span&gt;&lt;span&gt; ::03xx
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;找8086后面的4位，对于下面这个例子则为&lt;code&gt;9a49&lt;&#x2F;code&gt;，请替换为你自己的。&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;00:02.0 VGA compatible controller [0300]: Intel Corporation TigerLake-LP GT2 [Iris Xe Graphics] [8086:9a49] (rev 01)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;xie-nei-he-can-shu&quot;&gt;写内核参数&lt;&#x2F;h3&gt;
+&lt;p&gt;需要添加的内核参数为：&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;i915.force_probe=!pci-id xe.force_probe=pci-id
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;由于例子的pci id为&lt;code&gt;9a49&lt;&#x2F;code&gt;,替换&lt;code&gt;pci-id&lt;&#x2F;code&gt;为&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;i915.force_probe=!9a49 xe.force_probe=9a49
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h5 id=&quot;tian-jia-nei-he-can-shu-grub&quot;&gt;添加内核参数(grub)&lt;&#x2F;h5&gt;
+&lt;p&gt;编辑&lt;code&gt;&#x2F;etc&#x2F;default&#x2F;grub&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; nano &#x2F;etc&#x2F;default&#x2F;grub
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;找到这行&lt;code&gt;GRUB_CMDLINE_LINUX_DEFAULT&lt;&#x2F;code&gt;并在其中添加上内核参数。
+添加后如&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;&#x2F;etc&#x2F;default&#x2F;grub&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-&#x2F;etc&#x2F;default&#x2F;grub &quot;&gt;&lt;code class=&quot;language-&#x2F;etc&#x2F;default&#x2F;grub&quot; data-lang=&quot;&#x2F;etc&#x2F;default&#x2F;grub&quot;&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;GRUB_CMDLINE_LINUX_DEFAULT=&amp;quot;quiet splash i915.force_probe=!9a49 xe.force_probe=9a49&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;还有其他参数的话，每一个参数用空格隔开，一起写进去，默认只有&lt;code&gt;quiet splash&lt;&#x2F;code&gt;这2个参数。
+然后保存并退出。
+更新grub:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; update-grub
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;重启后就用上xe驱动了。&lt;&#x2F;p&gt;
+&lt;h5 id=&quot;jian-cha-shi-fou-qie-huan-cheng-gong&quot;&gt;检查是否切换成功&lt;&#x2F;h5&gt;
+&lt;p&gt;可以使用下面的命令检查&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lspci -k &lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;grep -EA3 &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;VGA|3D|Display&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;结果：&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;03:00.0 VGA compatible controller: Intel Corporation DG2 [Arc A770] (rev 08)
+&lt;&#x2F;span&gt;&lt;span&gt;    Subsystem: Intel Corporation Device 1020
+&lt;&#x2F;span&gt;&lt;span&gt;    Kernel driver in use: xe
+&lt;&#x2F;span&gt;&lt;span&gt;    Kernel modules: i915, xe
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;看到Kernel driver in use为xe就大功告成了。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;bsdqu-dong&quot;&gt;BSD驱动&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;freebsd&quot;&gt;FreeBSD&lt;&#x2F;h4&gt;
+&lt;p&gt;https:&#x2F;&#x2F;forums.freebsd.org&#x2F;threads&#x2F;intel-arc-gpu-support.89343&#x2F;&lt;&#x2F;p&gt;
+&lt;p&gt;https:&#x2F;&#x2F;github.com&#x2F;freebsd&#x2F;drm-kmod&#x2F;issues&#x2F;315
+测试过FreeBSD 14.3 release，使用drm-61-kmod，复现出上述问题。无法启动系统。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;qi-ta-bsd&quot;&gt;其他BSD&lt;&#x2F;h4&gt;
+&lt;p&gt;不支持。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ce-shi-huan-jie&quot;&gt;测试环节&lt;&#x2F;h2&gt;
+&lt;p&gt;详细请参照：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;ai性能
+&lt;a href=&quot;https:&#x2F;&#x2F;chimolog.co&#x2F;bto-gpu-stable-diffusion-specs&#x2F;&quot;&gt;【Stable Diffusion】AIイラストにおすすめなグラボをガチで検証【GPU別の生成速度】&lt;&#x2F;a&gt;
+&lt;a href=&quot;https:&#x2F;&#x2F;chimolog.co&#x2F;bto-gpu-wan22-specs&#x2F;&quot;&gt;【Wan2.2】動画生成AIにおすすめなグラボをガチで検証【GPU別の生成速度】&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;游戏性能
+B站上找测评。&lt;&#x2F;li&gt;
+&lt;li&gt;tom hardware
+&lt;a href=&quot;https:&#x2F;&#x2F;www.tomshardware.com&#x2F;pc-components&#x2F;gpus&#x2F;stable-diffusion-benchmarks&quot;&gt;Stable Diffusion Benchmarks: 45 Nvidia, AMD, and Intel GPUs Compared&lt;&#x2F;a&gt; 这个测评感觉不准，一是2023年的测评，intel驱动都更新好几波了，可能有影响。二是仅对Nvida和AMD的显卡使用pytorch。而对英特尔显卡使用&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;bes-dev&#x2F;stable_diffusion.openvino&quot;&gt;openvino&lt;&#x2F;a&gt;，。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;事先声明&lt;&#x2F;strong&gt;：受限于个人水平和硬件限制，我仅进行ai性能的简单测试，无法覆盖较多的场景，无法控制测试平台变量，但是理论上我找的测试平台不会对显卡造成瓶颈，结果仅作为参考。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;huan-jing-an-zhuang&quot;&gt;环境安装&lt;&#x2F;h3&gt;
+&lt;p&gt;torch均使用最新稳定版。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; venv .venv
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span&gt; .venv&#x2F;bin&#x2F;activate
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; pip install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --upgrade&lt;&#x2F;span&gt;&lt;span&gt; pip
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Intel
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --index-url&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;download.pytorch.org&#x2F;whl&#x2F;xpu
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Nvidia
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --index-url&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;download.pytorch.org&#x2F;whl&#x2F;cu129
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# AMD
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;python -m&lt;&#x2F;span&gt;&lt;span&gt; pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --index-url&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;download.pytorch.org&#x2F;whl&#x2F;rocm6.4
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;xpusu-du-ce-shi&quot;&gt;xpu速度测试&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;torch.xpu&lt;&#x2F;code&gt;可以代替&lt;code&gt;torch.cuda&lt;&#x2F;code&gt;，想测试xpu速度如何。
+&lt;a href=&quot;https:&#x2F;&#x2F;discuss.pytorch.org&#x2F;t&#x2F;timings-for-intel-arc-graphics-xpu-vs-nvidia-rtx-3000-gpu-on-a-laptop&#x2F;218200&quot;&gt;测试脚本来源&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;benchmark.py&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-benchmark.py &quot;&gt;&lt;code class=&quot;language-benchmark.py&quot; data-lang=&quot;benchmark.py&quot;&gt;&lt;span&gt;import torch
+&lt;&#x2F;span&gt;&lt;span&gt;print (torch.__version__)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;import time
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;torch.manual_seed (2025)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;device = &amp;#39;cpu&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;if  torch.cuda.is_available():
+&lt;&#x2F;span&gt;&lt;span&gt;    print (&amp;#39;version.cuda:&amp;#39;, torch.version.cuda)
+&lt;&#x2F;span&gt;&lt;span&gt;    print (torch.cuda.get_device_name())
+&lt;&#x2F;span&gt;&lt;span&gt;    print (torch.cuda.get_device_properties())
+&lt;&#x2F;span&gt;&lt;span&gt;    device = &amp;#39;cuda&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;if  torch.xpu.is_available():
+&lt;&#x2F;span&gt;&lt;span&gt;    print (&amp;#39;version.xpu:&amp;#39;, torch.version.xpu)
+&lt;&#x2F;span&gt;&lt;span&gt;    print (torch.xpu.get_device_name())
+&lt;&#x2F;span&gt;&lt;span&gt;    print (torch.xpu.get_device_properties())
+&lt;&#x2F;span&gt;&lt;span&gt;    device = &amp;#39;xpu&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;print (&amp;#39;device:&amp;#39;, device)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;vBatch = 100000
+&lt;&#x2F;span&gt;&lt;span&gt;nBatch = 100000
+&lt;&#x2F;span&gt;&lt;span&gt;nHidden = 512
+&lt;&#x2F;span&gt;&lt;span&gt;nEpoch = 1000
+&lt;&#x2F;span&gt;&lt;span&gt;# nPrint = 100
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;def fitFunction (x):
+&lt;&#x2F;span&gt;&lt;span&gt;    return (1 * x).sin()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;lossFn = torch.nn.MSELoss()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;model = torch.nn.Sequential (
+&lt;&#x2F;span&gt;&lt;span&gt;    torch.nn.Linear (1, nHidden),
+&lt;&#x2F;span&gt;&lt;span&gt;    torch.nn.Sigmoid(),
+&lt;&#x2F;span&gt;&lt;span&gt;    torch.nn.Linear (nHidden, nHidden),
+&lt;&#x2F;span&gt;&lt;span&gt;    torch.nn.Sigmoid(),
+&lt;&#x2F;span&gt;&lt;span&gt;    torch.nn.Linear (nHidden, 1)
+&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;opt = torch.optim.SGD (model.parameters(), lr = 0.01, momentum = 0.9)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;model.to (device)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;inputVal = torch.randn (vBatch, 1, device = device)
+&lt;&#x2F;span&gt;&lt;span&gt;targetVal = fitFunction (inputVal)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;lossInit = lossFn (model (inputVal), targetVal)
+&lt;&#x2F;span&gt;&lt;span&gt;print (&amp;#39;lossInit:&amp;#39;, lossInit)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;if device == &amp;#39;cuda&amp;#39;:  torch.cuda.synchronize()
+&lt;&#x2F;span&gt;&lt;span&gt;if device == &amp;#39;xpu&amp;#39;:   torch.xpu.synchronize()
+&lt;&#x2F;span&gt;&lt;span&gt;tBeg = time.time()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;for  i in range (nEpoch):
+&lt;&#x2F;span&gt;&lt;span&gt;    inp = torch.randn (nBatch, 1, device = device)
+&lt;&#x2F;span&gt;&lt;span&gt;    trg = fitFunction (inp)
+&lt;&#x2F;span&gt;&lt;span&gt;    loss = lossFn (model (inp), trg)
+&lt;&#x2F;span&gt;&lt;span&gt;    opt.zero_grad()
+&lt;&#x2F;span&gt;&lt;span&gt;    loss.backward()
+&lt;&#x2F;span&gt;&lt;span&gt;    opt.step()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;if  device == &amp;#39;cuda&amp;#39;:  torch.cuda.synchronize()
+&lt;&#x2F;span&gt;&lt;span&gt;if device == &amp;#39;xpu&amp;#39;:   torch.xpu.synchronize()
+&lt;&#x2F;span&gt;&lt;span&gt;tEnd = time.time()
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;lossFinl = lossFn (model (inputVal), targetVal)
+&lt;&#x2F;span&gt;&lt;span&gt;print (&amp;#39;lossFinl:&amp;#39;, lossFinl)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;print (&amp;#39;device:&amp;#39;, device, &amp;#39; time:&amp;#39;, &amp;#39;{0:.4f}&amp;#39;.format (tEnd - tBeg), &amp;#39;   nBatch:&amp;#39;, nBatch, &amp;#39; nEpoch:&amp;#39;, nEpoch)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;根据脚本作者提出的主要局限性：这是一个不切实际的简单测试模型（旨在饱和 GPU）。各种其他张量运算和更真实的模型可能会运行得更快或慢，只测试了float32。所以测试简单且不严谨，结果仅供参考。&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;跑完脚本所用时间&lt;&#x2F;code&gt;应该越少越好。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;torch cuda&#x2F;xpu版本&lt;&#x2F;th&gt;&lt;th&gt;用时&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;20.0945&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;20.3105&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;5060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.17.2-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;20.2183&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;26.2080&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;33.8658&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;46.5181&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;49.9113&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu126&lt;&#x2F;td&gt;&lt;td&gt;50.2602&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;脚本测试&amp;quot;
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    y-axis &amp;quot;跑完测试脚本所用时间 s&amp;quot; 0 --&amp;gt; 60
+    %% Green bar
+    bar [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    %% Blue bar
+    bar [20.0945, 20.3105]
+    line [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+&lt;&#x2F;pre&gt;
+&lt;p&gt;看起来xpu的速度还可以。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ollamace-shi&quot;&gt;ollama测试&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;yun-xing-ollama&quot;&gt;运行ollama&lt;&#x2F;h4&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;curl -fsSL&lt;&#x2F;span&gt;&lt;span&gt; https:&#x2F;&#x2F;ollama.com&#x2F;install.sh | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sh
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ollama&lt;&#x2F;span&gt;&lt;span&gt; serve
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;另外一个终端&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ollama&lt;&#x2F;span&gt;&lt;span&gt; run deepseek-r1:7b
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# or
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ollama&lt;&#x2F;span&gt;&lt;span&gt; run deepseek-r1:8b
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h4 id=&quot;wen-da-qian-qing-li-ji-yi-bing-qie-huan-dao-shu-chu-mo-shi&quot;&gt;问答前清理记忆并切换到输出模式&lt;&#x2F;h4&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; &#x2F;clear
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; &#x2F;set verbose
+&lt;&#x2F;span&gt;&lt;span&gt;Set &amp;#39;verbose&amp;#39; mode.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;问题:宇宙的外面是什么&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;deepseek-r1-7b&quot;&gt;deepseek-r1:7b&lt;&#x2F;h4&gt;
+&lt;p&gt;&lt;code&gt;tokens&#x2F;s&lt;&#x2F;code&gt;越大越好&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;ollama版本&lt;&#x2F;th&gt;&lt;th&gt;tokens&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.9.3(&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ipex-llm&#x2F;ipex-llm&#x2F;releases&#x2F;tag&#x2F;v2.3.0-nightly&quot;&gt;ipex-llm 2.3&lt;&#x2F;a&gt;)&lt;&#x2F;td&gt;&lt;td&gt;63.80&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;50.91&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;48.67&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;26.09&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;34.40&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;25.97&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;deepseek-r1:7b测试&amp;quot;
+    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    y-axis &amp;quot;每秒输出token数 tokens&amp;#x2F;s&amp;quot; 0 --&amp;gt; 80
+    %% Green bar
+    bar [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    %% Blue bar
+    bar [63.80]
+    line [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+&lt;&#x2F;pre&gt;&lt;h4 id=&quot;deepseek-r1-8b&quot;&gt;deepseek-r1:8b&lt;&#x2F;h4&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;ollama版本&lt;&#x2F;th&gt;&lt;th&gt;tokens&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.9.3(&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ipex-llm&#x2F;ipex-llm&#x2F;releases&#x2F;tag&#x2F;v2.3.0-nightly&quot;&gt;ipex-llm 2.3&lt;&#x2F;a&gt;)&lt;&#x2F;td&gt;&lt;td&gt;51.38&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;5060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.17.2-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;67.07&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;45.04&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;43.08&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;20.68&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;31.91&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;v0.12.10&lt;&#x2F;td&gt;&lt;td&gt;25.44&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;deepseek-r1:8b测试&amp;quot;
+    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    y-axis &amp;quot;每秒输出token数 tokens&amp;#x2F;s&amp;quot; 0 --&amp;gt; 80
+    %% Green bar
+    bar [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    %% Blue bar
+    bar [51.38]
+    line [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+&lt;&#x2F;pre&gt;&lt;h3 id=&quot;comfyuice-shi&quot;&gt;Comfyui测试&lt;&#x2F;h3&gt;
+&lt;p&gt;连续执行10次绘画任务，去除极端值取平均值。
+不考虑模型加载时间，仅测试比较其每秒迭代多少次即迭代速度(it&#x2F;s)。&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;gong-zuo-liu-guan-fang-shi-li-mo-ren-wen-sheng-tu-jiu-shi-na-ge-shui-ping&quot;&gt;工作流官方示例 默认 -&amp;gt; 文生图(就是那个水瓶)&lt;&#x2F;h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;除了图片大小和批量大小，其他均为默认设置，模型也为默认模型。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;&lt;code&gt;it&#x2F;s&lt;&#x2F;code&gt;应该越大越好。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;torch cuda&#x2F;xpu版本&lt;&#x2F;th&gt;&lt;th&gt;it&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;9.81&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;9.04&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;15.05&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;11.14&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;8.59&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;512x512 批量大小:1&amp;quot;
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;]
+    y-axis &amp;quot;每秒迭代数 it&amp;#x2F;s&amp;quot; 0 --&amp;gt; 20
+    %% Green bar
+    bar [9.81, 9.04, 15.05, 11.14, 8.59]
+    %% Blue bar
+    bar [9.81, 9.04]
+    line [9.81, 9.04, 15.05, 11.14, 8.59]
+&lt;&#x2F;pre&gt;&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;torch cuda&#x2F;xpu版本&lt;&#x2F;th&gt;&lt;th&gt;it&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;2.40&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;2.30&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;3.05&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;2.11&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.63&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;1024x1024 批量大小:1&amp;quot;
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;]
+    y-axis &amp;quot;每秒迭代数 it&amp;#x2F;s&amp;quot; 0 --&amp;gt; 5
+    %% Green bar
+    bar [2.40, 2.30, 3.05, 2.11, 1.63]
+    %% Blue bar
+    bar [2.40, 2.30]
+    line [2.40, 2.30, 3.05, 2.11, 1.63]
+&lt;&#x2F;pre&gt;
+&lt;p&gt;由于4050迭代速度太慢，已经自动转为用s&#x2F;it(每次迭代需要多少秒)显示，为了方便与其他显卡比较，故这里将4050的成绩&lt;code&gt;1.02s&#x2F;it&lt;&#x2F;code&gt;转换为&lt;code&gt;0.98it&#x2F;s&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;torch cuda&#x2F;xpu版本&lt;&#x2F;th&gt;&lt;th&gt;it&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;1.79&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;1.70&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.70&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.29&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;0.98&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;512x512 批量大小:10&amp;quot;
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;]
+    y-axis &amp;quot;每秒迭代数 it&amp;#x2F;s&amp;quot; 0 --&amp;gt; 3
+    %% Green bar
+    bar [1.79, 1.70, 1.70, 1.29, 0.98]
+    %% Blue bar
+    bar [1.79, 1.70]
+    line [1.79, 1.70, 1.70, 1.29, 0.98]
+&lt;&#x2F;pre&gt;
+&lt;p&gt;接下来，由于生成压力过大，迭代速度均变为s&#x2F;it(每次迭代需要多少秒)。
+该值越小越好。&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;torch cuda&#x2F;xpu版本&lt;&#x2F;th&gt;&lt;th&gt;s&#x2F;it&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;4.05&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;4.11&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;3.44&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;4.78&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;6.16&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: &amp;#x27;#00FF00, #0000FF, #000000&amp;#x27;
+---
+xychart-beta
+    title &amp;quot;1024x1024 批量大小:10&amp;quot;
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;]
+    y-axis &amp;quot;每次迭代需要多少秒 it&amp;#x2F;s&amp;quot; 0 --&amp;gt; 10
+    %% Green bar
+    bar [4.05, 4.11, 3.44, 4.78, 6.16]
+    %% Blue bar
+    bar [4.05, 4.11]
+    line [4.05, 4.11, 3.44, 4.78, 6.16]
+&lt;&#x2F;pre&gt;&lt;h2 id=&quot;shi-yong-ti-yan&quot;&gt;使用体验&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;ying-shi-ya-zhi&quot;&gt;影视压制&lt;&#x2F;h3&gt;
+&lt;h4 id=&quot;linux&quot;&gt;Linux&lt;&#x2F;h4&gt;
+&lt;p&gt;linux上使用&lt;code&gt;handbrake&lt;&#x2F;code&gt;进行压制，但是，&lt;code&gt;handbrake&lt;&#x2F;code&gt;的支持英特尔硬解的插件需要使用&lt;code&gt;flatpak&lt;&#x2F;code&gt;上面的版本。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;ai-playground-todo&quot;&gt;AI Playground(ToDo)&lt;&#x2F;h3&gt;
+&lt;p&gt;https:&#x2F;&#x2F;github.com&#x2F;intel&#x2F;AI-Playground&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;you-dian&quot;&gt;优点&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;在跑特定的ai任务(如ai绘画，大语言模型)的时候，性能会有优势(还得看模型，比较主流的模型支持的都还不错)。&lt;&#x2F;li&gt;
+&lt;li&gt;非矿，价格较低，大显存。&lt;&#x2F;li&gt;
+&lt;li&gt;拿来剪辑非常不错。&lt;&#x2F;li&gt;
+&lt;li&gt;支持avi硬编码，可用于影视资源的压制。&lt;&#x2F;li&gt;
+&lt;li&gt;考虑其价格的话，游戏帧率其实还不错&lt;&#x2F;li&gt;
+&lt;li&gt;支持&lt;code&gt;pytorch&lt;&#x2F;code&gt;以及&lt;code&gt;tensorflow&lt;&#x2F;code&gt;推理框架。&lt;&#x2F;li&gt;
+&lt;li&gt;可以软件级别进行多卡交火，十分炫酷。&lt;&#x2F;li&gt;
+&lt;li&gt;公版好看，灯带不灵不灵的，十分带感。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;que-dian&quot;&gt;缺点&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;待机功耗高
+无敌了，由于英特尔A系列驱动的缺陷，显卡待机功耗非常高，我这个A770待机有40w。
+在Window下，该问题可以缓解，缓解后降低到16w，请按照&lt;a href=&quot;https:&#x2F;&#x2F;www.intel.cn&#x2F;content&#x2F;www&#x2F;cn&#x2F;zh&#x2F;support&#x2F;articles&#x2F;000092564&#x2F;graphics.html&quot;&gt;英特尔官方教程&lt;&#x2F;a&gt;，待机时手动降低刷新率，关闭屏幕HDR，设置bios中pcie的asmp为L1子状态，以及在windows的电源设置中设置pcie省电为最大节能，详细请看官方教程。
+而在linux下，待机37w，貌似是无解，十分的逆天。&lt;&#x2F;li&gt;
+&lt;li&gt;对主板bios要有要求，最好能关闭csm(即完全使用UEFI)，能启用4G以上解码和能启用&lt;code&gt;resizable bar&lt;&#x2F;code&gt;。老主板不推荐。&lt;&#x2F;li&gt;
+&lt;li&gt;训练来说不是很适合，首先启用xpu训练还是较为折腾，其次，对于纯&lt;code&gt;pytorch&lt;&#x2F;code&gt;以及&lt;code&gt;tensorflow&lt;&#x2F;code&gt;还可以，如果更复杂的训练情况就不行了。最后，硬件有限制，之前遇到过不支持fp64精度的问题。&lt;&#x2F;li&gt;
+&lt;li&gt;一部分游戏性能不太行(dx9和dx11)。网游看风评也不太好，极度依赖驱动优化，而2025年驱动优化英特尔还做的依托。&lt;&#x2F;li&gt;
+&lt;li&gt;跑ai大模型的功能是由intel开源的ipex-llm打包的，虽然可以使用英特尔显卡，但是版本会过旧，可能跑不了一些比较新的模型（在我写这篇文章的时候，最新可用的是&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ipex-llm&#x2F;ipex-llm&#x2F;releases&#x2F;tag&#x2F;v2.3.0-nightly&quot;&gt;ipex-llm 2.3&lt;&#x2F;a&gt;，其ollama版本为&lt;code&gt;v0.9.3&lt;&#x2F;code&gt; 无法跑最新的qwen3。并且，英特尔并没有提供自己编译的教程，无法编译最新版本的ollama）。此外除了&lt;code&gt;ollama&lt;&#x2F;code&gt;，&lt;code&gt;llama.cpp&lt;&#x2F;code&gt;等，其他的ai大模型框架有赖于英特尔的适配。&lt;&#x2F;li&gt;
+&lt;li&gt;显卡（我的是公版，其他的版本也会有类似问题）在高负载下会有啸叫声。是A770的设计问题，显卡电子元件设计的太密了，在高负载下电流通过电感产生谐波，导致电感发出特殊的声音会更明显。&lt;&#x2F;li&gt;
+&lt;li&gt;在Linux下，无法读取显存信息。使用`xe`驱动后，`intel-gpu-tools`无法获取显卡信息。&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h3 id=&quot;zong-jie&quot;&gt;总结&lt;&#x2F;h3&gt;
+&lt;p&gt;总之不推荐购买A770。&lt;&#x2F;p&gt;
+&lt;p&gt;如果你打游戏，加钱上5060体验会好很多。二手同价位加一点点钱可以上3060ti,3070,6750gre。预算有限，我觉得现阶段16G显存对打游戏不是强需求，12G以内完全够用。&lt;&#x2F;p&gt;
+&lt;p&gt;如果你跑ai，老老实实换n卡，环境不需要折腾，用的省心。如果要大显存可以4060ti和5060ti。如果想要便宜3060 12G也不是不可以考虑。计算卡选Telsa T10会比Tesla V100更稳定一点。&lt;&#x2F;p&gt;
+&lt;p&gt;如果你能折腾，Tesla V100,MI50是更好的选择。&lt;&#x2F;p&gt;
+&lt;p&gt;适合的场景是&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;剪辑视频&lt;&#x2F;li&gt;
+&lt;li&gt;预算实在有限，想跑的ai，又不想整MI50，V100，2080ti这种花活，且非常想要16G显存。&lt;&#x2F;li&gt;
+&lt;li&gt;预算实在有限，想玩游戏，并确定你要玩的游戏是A770支持良好的，如dx12游戏。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2</title>
         <published>2025-07-23T00:00:00+00:00</published>

@@ -1,0 +1,245 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>A770使用体验</h1><span>2025-09-26</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/hardware-a770-test/#a770shi-yong-ti-yan>A770使用体验</a> <ul><li><a href=https://blog.0pt.icu/posts/hardware-a770-test/#yin>引</a><li><a href=https://blog.0pt.icu/posts/hardware-a770-test/#qu-dong>驱动</a><li><a href=https://blog.0pt.icu/posts/hardware-a770-test/#ce-shi-huan-jie>测试环节</a><li><a href=https://blog.0pt.icu/posts/hardware-a770-test/#shi-yong-ti-yan>使用体验</a></ul></ul></div><div class=post-content><h1 id=a770shi-yong-ti-yan>A770使用体验</h1><h2 id=yin>引</h2><p>8月底把游戏本出了装机，想搞一张能跑ai绘画顺便能打打游戏的显卡。<ol><li>我对显存有要求，至少12G显存。<li>性价比高。<li>不是特别在意游戏性能。<li>不折腾也不要太牢的卡，像Tesla V100，MI50这种的卡也不想要。</ol><p>挑显卡时偶然看到了Intel Arc A770 16G在海鲜市场二手价格1200元。以较低价格购买一张16G显存并且比较像样的显卡，是比较有吸引力的。 主要担心的是，Intel显卡徒有其表，虽然规格看上去很美丽，跑分也很美丽，但实际用起来就不是那么美丽了。 在参考了<a href=https://chimolog.co/bto-gpu-stable-diffusion-specs/>【Stable Diffusion】AIイラストにおすすめなグラボをガチで検証【GPU別の生成速度】</a>的显卡ai绘画大横评后，我认为A770这张卡看起来还行，于是搞了一张A770公版。<h2 id=qu-dong>驱动</h2><h3 id=windowsqu-dong>Windows驱动</h3><p>直接官网下载安装即可。我使用最新驱动，如果打游戏，应该去找找之前版本的驱动，因为A770驱动在2025年是负优化居多，而A770的游戏表现比较依赖驱动的优化。<h3 id=linuxqu-dong>Linux驱动</h3><p>正常显示是没问题的，默认使用intel的i915开源驱动。 以下驱动是为了满足使用A770在Linux上进行计算、推理和跑ai。 对系统有要求：<ol><li>最好是内核6.0以上(not sure) 使用以下命令查看。</ol><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>uname -r
+</span></code></pre><ol start=2><li>内核带有GuC/HuC firmware 使用以下命令查看。</ol><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>dmesg </span><span>| </span><span style=color:#bf616a>grep -i -e </span><span>'</span><span style=color:#a3be8c>huc</span><span>'</span><span style=color:#bf616a> -e </span><span>'</span><span style=color:#a3be8c>guc</span><span>'
+</span></code></pre><p>一般来说，使用比较新的内核都会自动加载。 没有的话查看<a href=https://wiki.archlinux.org/title/Intel_graphics#Enable_GuC_/_HuC_firmware_loading>这个</a>来安装和开启。<ol start=3><li><p>Intel Compute Runtime 可能需要用对应系统的包管理器安装。</p><li><p>Level Zero 可能需要用对应系统的包管理器安装。</p></ol><h4 id=ubuntu>Ubuntu</h4><p>Intel有为他们的显卡在Ubuntu平台上开发驱动。 应按照此篇<a href=https://dgpu-docs.intel.com/driver/client/overview.html#ubuntu-latest>官方教程</a>安装驱动。<h4 id=cachyos-arch-fa-xing-ban>Cachyos (Arch 发行版)</h4><p>正常安装系统后，需要用包管理器安装<code>Intel Compute Runtime</code>和<code>Level Zero</code>。<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>sudo</span><span> pacman</span><span style=color:#bf616a> -S</span><span> intel-compute-runtime level-zero-loader level-zero-headers
+</span></code></pre><h4 id=qi-ta-linuxfa-xing-ban>其他Linux发行版</h4><p>没有测试过，检查是否满足4个条件。<h4 id=ru-he-jian-cha-qu-dong-shi-fou-an-zhuang-cheng-gong>如何检查驱动是否安装成功</h4><p>检测是否安装成功可以使用<code>torch.xpu</code>。<blockquote><p>推荐直接使用python venv虚拟环境。我在Ubuntu 24.04.3上面使用conda会识别不到我的A770。</blockquote><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>python -m</span><span> venv .venv
+</span><span style=color:#96b5b4>source</span><span> .venv/bin/activate
+</span><span style=color:#bf616a>pip</span><span> install</span><span style=color:#bf616a> --upgrade</span><span> pip
+</span><span style=color:#bf616a>pip</span><span> install torch torchvision torchaudio</span><span style=color:#bf616a> --index-url</span><span> https://download.pytorch.org/whl/xpu
+</span><span style=color:#bf616a>python -c </span><span>"</span><span style=color:#a3be8c>import torch;print(f</span><span>"XPU available: {torch.xpu.is_available()}"</span><span style=color:#a3be8c>);print(f</span><span>"Device count: {torch.xpu.device_count()}"</span><span style=color:#a3be8c>);print(f</span><span>"Device name: {torch.xpu.get_device_name(0)}"</span><span style=color:#a3be8c>);</span><span>"
+</span></code></pre><p>如果xpu可用显示true，arc显卡计数不为0，以及可以显示arc显卡名字，则驱动安装成功。 如果xpu可用显示flase，arc显卡计数为0，以及不能显示arc显卡名字，则驱动安装失败。需要再检查检查哪里没安装好。<h4 id=jiang-i915qu-dong-ti-huan-wei-xequ-dong>将i915驱动替换为xe驱动</h4><p>i915驱动是linux默认为intel gpu启用的驱动。可以手动切换到xe驱动以提高性能。 <a href=https://www.phoronix.com/review/intel-i915-xe-linux-2025>该篇文章</a>是2种驱动对比。文章有5页，记得翻页看。<p>在arch wiki中也有<a href=https://wiki.archlinux.org/title/Intel_graphics#Testing_the_new_experimental_Xe_driver>切换Xe驱动的教程</a><h5 id=jian-cha-qi-yong-xequ-dong-de-qian-zhi-tiao-jian>检查启用Xe驱动的前置条件</h5><p>来自archwiki<ul><li>linux 6.8 内核及其更新的版本<li>Tiger Lake架构(11代酷睿)以及更新的集显, 或者独显。<li>mesa.</ul><h6 id=cha-kan-intel-xian-qia-de-pci-id>查看intel 显卡的pci id</h6><p>看看自己的intel显卡是否支持xe驱动<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>lspci -k </span><span>| </span><span style=color:#bf616a>grep -EA3 </span><span>'</span><span style=color:#a3be8c>VGA|3D|Display</span><span>'
+</span></code></pre><p>我的示例如下，可以看到Kernel modules: i915, xe,支持i915和xe。 当前使用的是i915。<pre style=color:#c0c5ce;background-color:#2b303b><code><span>03:00.0 VGA compatible controller: Intel Corporation DG2 [Arc A770] (rev 08)
+</span><span>    Subsystem: Intel Corporation Device 1020
+</span><span>    Kernel driver in use: i915
+</span><span>    Kernel modules: i915, xe
+</span></code></pre><p>查看pci id：<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>lspci -nnd</span><span> ::03xx
+</span></code></pre><p>找8086后面的4位，对于下面这个例子则为<code>9a49</code>，请替换为你自己的。<pre style=color:#c0c5ce;background-color:#2b303b><code><span>00:02.0 VGA compatible controller [0300]: Intel Corporation TigerLake-LP GT2 [Iris Xe Graphics] [8086:9a49] (rev 01)
+</span></code></pre><h3 id=xie-nei-he-can-shu>写内核参数</h3><p>需要添加的内核参数为：<pre style=color:#c0c5ce;background-color:#2b303b><code><span>i915.force_probe=!pci-id xe.force_probe=pci-id
+</span></code></pre><p>由于例子的pci id为<code>9a49</code>,替换<code>pci-id</code>为<pre style=color:#c0c5ce;background-color:#2b303b><code><span>i915.force_probe=!9a49 xe.force_probe=9a49
+</span></code></pre><h5 id=tian-jia-nei-he-can-shu-grub>添加内核参数(grub)</h5><p>编辑<code>/etc/default/grub</code><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>sudo</span><span> nano /etc/default/grub
+</span></code></pre><p>找到这行<code>GRUB_CMDLINE_LINUX_DEFAULT</code>并在其中添加上内核参数。 添加后如<pre class=language-/etc/default/grub data-lang=/etc/default/grub style=color:#c0c5ce;background-color:#2b303b><code class=language-/etc/default/grub data-lang=/etc/default/grub><span>...
+</span><span>GRUB_CMDLINE_LINUX_DEFAULT="quiet splash i915.force_probe=!9a49 xe.force_probe=9a49"
+</span><span>...
+</span></code></pre><p>还有其他参数的话，每一个参数用空格隔开，一起写进去，默认只有<code>quiet splash</code>这2个参数。 然后保存并退出。 更新grub:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>sudo</span><span> update-grub
+</span></code></pre><p>重启后就用上xe驱动了。<h5 id=jian-cha-shi-fou-qie-huan-cheng-gong>检查是否切换成功</h5><p>可以使用下面的命令检查<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>lspci -k </span><span>| </span><span style=color:#bf616a>grep -EA3 </span><span>'</span><span style=color:#a3be8c>VGA|3D|Display</span><span>'
+</span></code></pre><p>结果：<pre style=color:#c0c5ce;background-color:#2b303b><code><span>03:00.0 VGA compatible controller: Intel Corporation DG2 [Arc A770] (rev 08)
+</span><span>    Subsystem: Intel Corporation Device 1020
+</span><span>    Kernel driver in use: xe
+</span><span>    Kernel modules: i915, xe
+</span></code></pre><p>看到Kernel driver in use为xe就大功告成了。<h3 id=bsdqu-dong>BSD驱动</h3><h4 id=freebsd>FreeBSD</h4><p>https://forums.freebsd.org/threads/intel-arc-gpu-support.89343/<p>https://github.com/freebsd/drm-kmod/issues/315 测试过FreeBSD 14.3 release，使用drm-61-kmod，复现出上述问题。无法启动系统。<h4 id=qi-ta-bsd>其他BSD</h4><p>不支持。<h2 id=ce-shi-huan-jie>测试环节</h2><p>详细请参照：<ul><li>ai性能 <a href=https://chimolog.co/bto-gpu-stable-diffusion-specs/>【Stable Diffusion】AIイラストにおすすめなグラボをガチで検証【GPU別の生成速度】</a> <a href=https://chimolog.co/bto-gpu-wan22-specs/>【Wan2.2】動画生成AIにおすすめなグラボをガチで検証【GPU別の生成速度】</a><li>游戏性能 B站上找测评。<li>tom hardware <a href=https://www.tomshardware.com/pc-components/gpus/stable-diffusion-benchmarks>Stable Diffusion Benchmarks: 45 Nvidia, AMD, and Intel GPUs Compared</a> 这个测评感觉不准，一是2023年的测评，intel驱动都更新好几波了，可能有影响。二是仅对Nvida和AMD的显卡使用pytorch。而对英特尔显卡使用<a href=https://github.com/bes-dev/stable_diffusion.openvino>openvino</a>，。</ul><p><strong>事先声明</strong>：受限于个人水平和硬件限制，我仅进行ai性能的简单测试，无法覆盖较多的场景，无法控制测试平台变量，但是理论上我找的测试平台不会对显卡造成瓶颈，结果仅作为参考。<h3 id=huan-jing-an-zhuang>环境安装</h3><p>torch均使用最新稳定版。<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>python -m</span><span> venv .venv
+</span><span style=color:#96b5b4>source</span><span> .venv/bin/activate
+</span><span style=color:#bf616a>python -m</span><span> pip install</span><span style=color:#bf616a> --upgrade</span><span> pip
+</span><span style=color:#65737e># Intel
+</span><span style=color:#bf616a>python -m</span><span> pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0</span><span style=color:#bf616a> --index-url</span><span> https://download.pytorch.org/whl/xpu
+</span><span style=color:#65737e># Nvidia
+</span><span style=color:#bf616a>python -m</span><span> pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0</span><span style=color:#bf616a> --index-url</span><span> https://download.pytorch.org/whl/cu129
+</span><span style=color:#65737e># AMD
+</span><span style=color:#bf616a>python -m</span><span> pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0</span><span style=color:#bf616a> --index-url</span><span> https://download.pytorch.org/whl/rocm6.4
+</span></code></pre><h3 id=xpusu-du-ce-shi>xpu速度测试</h3><p><code>torch.xpu</code>可以代替<code>torch.cuda</code>，想测试xpu速度如何。 <a href=https://discuss.pytorch.org/t/timings-for-intel-arc-graphics-xpu-vs-nvidia-rtx-3000-gpu-on-a-laptop/218200>测试脚本来源</a><pre class=language-benchmark.py data-lang=benchmark.py style=color:#c0c5ce;background-color:#2b303b><code class=language-benchmark.py data-lang=benchmark.py><span>import torch
+</span><span>print (torch.__version__)
+</span><span>
+</span><span>import time
+</span><span>
+</span><span>torch.manual_seed (2025)
+</span><span>
+</span><span>device = 'cpu'
+</span><span>if  torch.cuda.is_available():
+</span><span>    print ('version.cuda:', torch.version.cuda)
+</span><span>    print (torch.cuda.get_device_name())
+</span><span>    print (torch.cuda.get_device_properties())
+</span><span>    device = 'cuda'
+</span><span>if  torch.xpu.is_available():
+</span><span>    print ('version.xpu:', torch.version.xpu)
+</span><span>    print (torch.xpu.get_device_name())
+</span><span>    print (torch.xpu.get_device_properties())
+</span><span>    device = 'xpu'
+</span><span>
+</span><span>print ('device:', device)
+</span><span>
+</span><span>vBatch = 100000
+</span><span>nBatch = 100000
+</span><span>nHidden = 512
+</span><span>nEpoch = 1000
+</span><span># nPrint = 100
+</span><span>
+</span><span>def fitFunction (x):
+</span><span>    return (1 * x).sin()
+</span><span>
+</span><span>lossFn = torch.nn.MSELoss()
+</span><span>
+</span><span>model = torch.nn.Sequential (
+</span><span>    torch.nn.Linear (1, nHidden),
+</span><span>    torch.nn.Sigmoid(),
+</span><span>    torch.nn.Linear (nHidden, nHidden),
+</span><span>    torch.nn.Sigmoid(),
+</span><span>    torch.nn.Linear (nHidden, 1)
+</span><span>)
+</span><span>
+</span><span>opt = torch.optim.SGD (model.parameters(), lr = 0.01, momentum = 0.9)
+</span><span>
+</span><span>model.to (device)
+</span><span>
+</span><span>inputVal = torch.randn (vBatch, 1, device = device)
+</span><span>targetVal = fitFunction (inputVal)
+</span><span>
+</span><span>lossInit = lossFn (model (inputVal), targetVal)
+</span><span>print ('lossInit:', lossInit)
+</span><span>
+</span><span>if device == 'cuda':  torch.cuda.synchronize()
+</span><span>if device == 'xpu':   torch.xpu.synchronize()
+</span><span>tBeg = time.time()
+</span><span>
+</span><span>for  i in range (nEpoch):
+</span><span>    inp = torch.randn (nBatch, 1, device = device)
+</span><span>    trg = fitFunction (inp)
+</span><span>    loss = lossFn (model (inp), trg)
+</span><span>    opt.zero_grad()
+</span><span>    loss.backward()
+</span><span>    opt.step()
+</span><span>
+</span><span>if  device == 'cuda':  torch.cuda.synchronize()
+</span><span>if device == 'xpu':   torch.xpu.synchronize()
+</span><span>tEnd = time.time()
+</span><span>
+</span><span>lossFinl = lossFn (model (inputVal), targetVal)
+</span><span>print ('lossFinl:', lossFinl)
+</span><span>
+</span><span>print ('device:', device, ' time:', '{0:.4f}'.format (tEnd - tBeg), '   nBatch:', nBatch, ' nEpoch:', nEpoch)
+</span></code></pre><p>根据脚本作者提出的主要局限性：这是一个不切实际的简单测试模型（旨在饱和 GPU）。各种其他张量运算和更真实的模型可能会运行得更快或慢，只测试了float32。所以测试简单且不严谨，结果仅供参考。<p><code>跑完脚本所用时间</code>应该越少越好。<table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>torch cuda/xpu版本<th>用时<tbody><tr><td>A770(1)<td>CachyOS<td>6.16.7-2-cachyos<td>2.8.0+xpu<td>20.0945<tr><td>A770(2)<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+xpu<td>20.3105<tr><td>5060ti 16G<td>CachyOS<td>6.17.2-2-cachyos<td>2.8.0+cu129<td>20.2183<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>26.2080<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>33.8658<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>46.5181<tr><td>Tesla T4(1)<td>Ubuntu 20.04.6 LTS<td>5.4.0-166-generic<td>2.8.0+cu129<td>49.9113<tr><td>Tesla T4(2)<td>Ubuntu 22.04.5 LTS<td>6.6.97+<td>2.8.0+cu126<td>50.2602</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "脚本测试"
+    x-axis ["A770(1)", "A770(2)", "5060ti 16G", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    y-axis "跑完测试脚本所用时间 s" 0 --> 60
+    %% Green bar
+    bar [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    %% Blue bar
+    bar [20.0945, 20.3105]
+    line [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+</pre><p>看起来xpu的速度还可以。<h3 id=ollamace-shi>ollama测试</h3><h4 id=yun-xing-ollama>运行ollama</h4><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>curl -fsSL</span><span> https://ollama.com/install.sh | </span><span style=color:#bf616a>sh
+</span><span style=color:#bf616a>ollama</span><span> serve
+</span></code></pre><p>另外一个终端<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ollama</span><span> run deepseek-r1:7b
+</span><span style=color:#65737e># or
+</span><span style=color:#bf616a>ollama</span><span> run deepseek-r1:8b
+</span></code></pre><h4 id=wen-da-qian-qing-li-ji-yi-bing-qie-huan-dao-shu-chu-mo-shi>问答前清理记忆并切换到输出模式</h4><pre style=color:#c0c5ce;background-color:#2b303b><code><span>>>> /clear
+</span><span>>>> /set verbose
+</span><span>Set 'verbose' mode.
+</span></code></pre><p>问题:宇宙的外面是什么<h4 id=deepseek-r1-7b>deepseek-r1:7b</h4><p><code>tokens/s</code>越大越好<table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>ollama版本<th>tokens/s<tbody><tr><td>A770<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.9.3(<a href=https://github.com/ipex-llm/ipex-llm/releases/tag/v2.3.0-nightly>ipex-llm 2.3</a>)<td>63.80<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>50.91<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>48.67<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>26.09<tr><td>Tesla T4(1)<td>Ubuntu 20.04.6 LTS<td>5.4.0-166-generic<td>v0.12.2<td>34.40<tr><td>Tesla T4(2)<td>Ubuntu 22.04.5 LTS<td>6.6.97+<td>v0.12.2<td>25.97</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "deepseek-r1:7b测试"
+    x-axis ["A770", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    y-axis "每秒输出token数 tokens/s" 0 --> 80
+    %% Green bar
+    bar [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    %% Blue bar
+    bar [63.80]
+    line [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+</pre><h4 id=deepseek-r1-8b>deepseek-r1:8b</h4><table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>ollama版本<th>tokens/s<tbody><tr><td>A770<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.9.3(<a href=https://github.com/ipex-llm/ipex-llm/releases/tag/v2.3.0-nightly>ipex-llm 2.3</a>)<td>51.38<tr><td>5060ti 16G<td>CachyOS<td>6.17.2-2-cachyos<td>v0.11.10<td>67.07<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>45.04<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>43.08<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>v0.11.10<td>20.68<tr><td>Tesla T4(1)<td>Ubuntu 20.04.6 LTS<td>5.4.0-166-generic<td>v0.12.2<td>31.91<tr><td>Tesla T4(2)<td>Ubuntu 22.04.5 LTS<td>6.6.97+<td>v0.12.10<td>25.44</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "deepseek-r1:8b测试"
+    x-axis ["A770", "5060ti 16G", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    y-axis "每秒输出token数 tokens/s" 0 --> 80
+    %% Green bar
+    bar [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    %% Blue bar
+    bar [51.38]
+    line [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+</pre><h3 id=comfyuice-shi>Comfyui测试</h3><p>连续执行10次绘画任务，去除极端值取平均值。 不考虑模型加载时间，仅测试比较其每秒迭代多少次即迭代速度(it/s)。<h4 id=gong-zuo-liu-guan-fang-shi-li-mo-ren-wen-sheng-tu-jiu-shi-na-ge-shui-ping>工作流官方示例 默认 -> 文生图(就是那个水瓶)</h4><blockquote><p>除了图片大小和批量大小，其他均为默认设置，模型也为默认模型。</blockquote><p><code>it/s</code>应该越大越好。<table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>torch cuda/xpu版本<th>it/s<tbody><tr><td>A770(1)<td>CachyOS<td>6.16.7-2-cachyos<td>2.8.0+xpu<td>9.81<tr><td>A770(2)<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+xpu<td>9.04<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>15.05<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>11.14<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>8.59</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "512x512 批量大小:1"
+    x-axis ["A770(1)", "A770(2)", "4060ti 16G", "4060 laptop", "4050 laptop"]
+    y-axis "每秒迭代数 it/s" 0 --> 20
+    %% Green bar
+    bar [9.81, 9.04, 15.05, 11.14, 8.59]
+    %% Blue bar
+    bar [9.81, 9.04]
+    line [9.81, 9.04, 15.05, 11.14, 8.59]
+</pre><table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>torch cuda/xpu版本<th>it/s<tbody><tr><td>A770(1)<td>CachyOS<td>6.16.7-2-cachyos<td>2.8.0+xpu<td>2.40<tr><td>A770(2)<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+xpu<td>2.30<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>3.05<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>2.11<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>1.63</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "1024x1024 批量大小:1"
+    x-axis ["A770(1)", "A770(2)", "4060ti 16G", "4060 laptop", "4050 laptop"]
+    y-axis "每秒迭代数 it/s" 0 --> 5
+    %% Green bar
+    bar [2.40, 2.30, 3.05, 2.11, 1.63]
+    %% Blue bar
+    bar [2.40, 2.30]
+    line [2.40, 2.30, 3.05, 2.11, 1.63]
+</pre><p>由于4050迭代速度太慢，已经自动转为用s/it(每次迭代需要多少秒)显示，为了方便与其他显卡比较，故这里将4050的成绩<code>1.02s/it</code>转换为<code>0.98it/s</code>。<table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>torch cuda/xpu版本<th>it/s<tbody><tr><td>A770(1)<td>CachyOS<td>6.16.7-2-cachyos<td>2.8.0+xpu<td>1.79<tr><td>A770(2)<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+xpu<td>1.70<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>1.70<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>1.29<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>0.98</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "512x512 批量大小:10"
+    x-axis ["A770(1)", "A770(2)", "4060ti 16G", "4060 laptop", "4050 laptop"]
+    y-axis "每秒迭代数 it/s" 0 --> 3
+    %% Green bar
+    bar [1.79, 1.70, 1.70, 1.29, 0.98]
+    %% Blue bar
+    bar [1.79, 1.70]
+    line [1.79, 1.70, 1.70, 1.29, 0.98]
+</pre><p>接下来，由于生成压力过大，迭代速度均变为s/it(每次迭代需要多少秒)。 该值越小越好。<table><thead><tr><th>代称<th>Linux发行版<th>Linux内核<th>torch cuda/xpu版本<th>s/it<tbody><tr><td>A770(1)<td>CachyOS<td>6.16.7-2-cachyos<td>2.8.0+xpu<td>4.05<tr><td>A770(2)<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+xpu<td>4.11<tr><td>4060ti 16G<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>3.44<tr><td>4060 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>4.78<tr><td>4050 laptop<td>Ubuntu 24.04.3 LTS<td>6.14.0-29-generic<td>2.8.0+cu129<td>6.16</table><pre class=mermaid>
+---
+config:
+  xyChart:
+    showDataLabel: true
+  themeVariables:
+    xyChart:
+      plotColorPalette: '#00FF00, #0000FF, #000000'
+---
+xychart-beta
+    title "1024x1024 批量大小:10"
+    x-axis ["A770(1)", "A770(2)", "4060ti 16G", "4060 laptop", "4050 laptop"]
+    y-axis "每次迭代需要多少秒 it/s" 0 --> 10
+    %% Green bar
+    bar [4.05, 4.11, 3.44, 4.78, 6.16]
+    %% Blue bar
+    bar [4.05, 4.11]
+    line [4.05, 4.11, 3.44, 4.78, 6.16]
+</pre><h2 id=shi-yong-ti-yan>使用体验</h2><h3 id=ying-shi-ya-zhi>影视压制</h3><h4 id=linux>Linux</h4><p>linux上使用<code>handbrake</code>进行压制，但是，<code>handbrake</code>的支持英特尔硬解的插件需要使用<code>flatpak</code>上面的版本。<h3 id=ai-playground-todo>AI Playground(ToDo)</h3><p>https://github.com/intel/AI-Playground<h3 id=you-dian>优点</h3><ol><li>在跑特定的ai任务(如ai绘画，大语言模型)的时候，性能会有优势(还得看模型，比较主流的模型支持的都还不错)。<li>非矿，价格较低，大显存。<li>拿来剪辑非常不错。<li>支持avi硬编码，可用于影视资源的压制。<li>考虑其价格的话，游戏帧率其实还不错<li>支持<code>pytorch</code>以及<code>tensorflow</code>推理框架。<li>可以软件级别进行多卡交火，十分炫酷。<li>公版好看，灯带不灵不灵的，十分带感。</ol><h3 id=que-dian>缺点</h3><ol><li>待机功耗高 无敌了，由于英特尔A系列驱动的缺陷，显卡待机功耗非常高，我这个A770待机有40w。 在Window下，该问题可以缓解，缓解后降低到16w，请按照<a href=https://www.intel.cn/content/www/cn/zh/support/articles/000092564/graphics.html>英特尔官方教程</a>，待机时手动降低刷新率，关闭屏幕HDR，设置bios中pcie的asmp为L1子状态，以及在windows的电源设置中设置pcie省电为最大节能，详细请看官方教程。 而在linux下，待机37w，貌似是无解，十分的逆天。<li>对主板bios要有要求，最好能关闭csm(即完全使用UEFI)，能启用4G以上解码和能启用<code>resizable bar</code>。老主板不推荐。<li>训练来说不是很适合，首先启用xpu训练还是较为折腾，其次，对于纯<code>pytorch</code>以及<code>tensorflow</code>还可以，如果更复杂的训练情况就不行了。最后，硬件有限制，之前遇到过不支持fp64精度的问题。<li>一部分游戏性能不太行(dx9和dx11)。网游看风评也不太好，极度依赖驱动优化，而2025年驱动优化英特尔还做的依托。<li>跑ai大模型的功能是由intel开源的ipex-llm打包的，虽然可以使用英特尔显卡，但是版本会过旧，可能跑不了一些比较新的模型（在我写这篇文章的时候，最新可用的是<a href=https://github.com/ipex-llm/ipex-llm/releases/tag/v2.3.0-nightly>ipex-llm 2.3</a>，其ollama版本为<code>v0.9.3</code> 无法跑最新的qwen3。并且，英特尔并没有提供自己编译的教程，无法编译最新版本的ollama）。此外除了<code>ollama</code>，<code>llama.cpp</code>等，其他的ai大模型框架有赖于英特尔的适配。<li>显卡（我的是公版，其他的版本也会有类似问题）在高负载下会有啸叫声。是A770的设计问题，显卡电子元件设计的太密了，在高负载下电流通过电感产生谐波，导致电感发出特殊的声音会更明显。<li>在Linux下，无法读取显存信息。使用`xe`驱动后，`intel-gpu-tools`无法获取显卡信息。</ol><h3 id=zong-jie>总结</h3><p>总之不推荐购买A770。<p>如果你打游戏，加钱上5060体验会好很多。二手同价位加一点点钱可以上3060ti,3070,6750gre。预算有限，我觉得现阶段16G显存对打游戏不是强需求，12G以内完全够用。<p>如果你跑ai，老老实实换n卡，环境不需要折腾，用的省心。如果要大显存可以4060ti和5060ti。如果想要便宜3060 12G也不是不可以考虑。计算卡选Telsa T10会比Tesla V100更稳定一点。<p>如果你能折腾，Tesla V100,MI50是更好的选择。<p>适合的场景是<ul><li>剪辑视频<li>预算实在有限，想跑的ai，又不想整MI50，V100，2080ti这种花活，且非常想要16G显存。<li>预算实在有限，想玩游戏，并确定你要玩的游戏是A770支持良好的，如dx12游戏。</ul></div></div><script type=module>import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({ theme: 'neutral',});</script>
