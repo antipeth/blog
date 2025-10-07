@@ -26,8 +26,8 @@ date = 2025-09-26
 ### Linux驱动
 
 正常显示是没问题的，默认使用intel的i915开源驱动。
-以下驱动是为了满足使用A770在Linux上进行计算、推理和跑ai。
-对系统有要求：
+以下是为了满足使用A770在Linux上进行计算、推理和跑ai。
+首先，对系统有要求：
 
 1.  最好是内核6.0以上(not sure)
     使用以下命令查看。
@@ -322,16 +322,19 @@ print ('device:', device, ' time:', '{0:.4f}'.format (tEnd - tBeg), '   nBatch:'
 | A770(1) | CachyOS | 6.16.7-2-cachyos | 2.8.0+xpu | 20.0945 |
 | A770(2) | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+xpu | 20.3105 |
 | 5060ti 16G | CachyOS | 6.17.2-2-cachyos | 2.8.0+cu129 | 20.2183 |
+| 5060 | ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 23.0996 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 26.2080 |
-| 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 33.8658 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 46.5181 |
+| 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 33.4658 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 46.5181 |
 | Tesla T4(1) | Ubuntu 20.04.6 LTS | 5.4.0-166-generic | 2.8.0+cu129 | 49.9113 |
 | Tesla T4(2) | Ubuntu 22.04.5 LTS | 6.6.97+ | 2.8.0+cu126 | 50.2602 |
+| GTX 1650 laptop | Linux Mint 22.2 | 6.14.0-29-generic | 2.8.0+cu126 | 100.8302 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -339,13 +342,13 @@ config:
 ---
 xychart-beta
     title "脚本测试"
-    x-axis ["A770(1)", "A770(2)", "5060ti 16G", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    x-axis ["A770(1)", "A770(2)", "5060ti 16G", "5060","4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)", "GTX 1650 laptop"]
     y-axis "跑完测试脚本所用时间 s" 0 --> 60
     %% Green bar
-    bar [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    bar [20.0945, 20.3105, 20.2183, 23.0996, 26.2080, 33.4658, 46.5181, 49.9113, 50.2602,100.8302 ]
     %% Blue bar
     bar [20.0945, 20.3105]
-    line [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    line [20.0945, 20.3105, 20.2183, 23.0996, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602,100.8302 ]
 {% end %}
 
 看起来xpu的速度还可以。
@@ -384,16 +387,18 @@ Set 'verbose' mode.
 | 代称  | Linux发行版 | Linux内核 | ollama版本 | tokens/s |
 | --- | --- | --- | --- | --- |
 | A770 | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.9.3([ipex-llm 2.3](https://github.com/ipex-llm/ipex-llm/releases/tag/v2.3.0-nightly)) | 63.80 |
+| 5060 | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.12.2 | 72.07 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 50.91 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 48.67 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 26.09 |
-| Tesla T4(1) | Ubuntu 20.04.6 LTS | 5.4.0-166-generic | v0.12.2 | 34.40 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 26.09 |
+| Tesla T4(1) | Ubuntu 20.04.6 LTS | 5.4.0-166-generic | v0.12.3 | 34.40 |
 | Tesla T4(2) | Ubuntu 22.04.5 LTS | 6.6.97+ | v0.12.2 | 25.97 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -401,13 +406,13 @@ config:
 ---
 xychart-beta
     title "deepseek-r1:7b测试"
-    x-axis ["A770", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    x-axis ["A770", "5060", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
     y-axis "每秒输出token数 tokens/s" 0 --> 80
     %% Green bar
-    bar [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    bar [63.80, 72.07, 50.91, 48.67, 26.09, 34.40, 25.97]
     %% Blue bar
     bar [63.80]
-    line [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    line [63.80, 72.07, 50.91, 48.67, 26.09, 34.40, 25.97]
 {% end %}
 
 #### deepseek-r1:8b
@@ -416,9 +421,10 @@ xychart-beta
 | --- | --- | --- | --- | --- |
 | A770 | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.9.3([ipex-llm 2.3](https://github.com/ipex-llm/ipex-llm/releases/tag/v2.3.0-nightly)) | 51.38 |
 | 5060ti 16G | CachyOS | 6.17.2-2-cachyos | v0.11.10 | 67.07 |
+| 5060 | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.12.3 | 63.86 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 45.04 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 43.08 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 20.68 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | v0.11.10 | 20.68 |
 | Tesla T4(1) | Ubuntu 20.04.6 LTS | 5.4.0-166-generic | v0.12.2 | 31.91 |
 | Tesla T4(2) | Ubuntu 22.04.5 LTS | 6.6.97+ | v0.12.10 | 25.44 |
 
@@ -426,6 +432,7 @@ xychart-beta
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -433,13 +440,13 @@ config:
 ---
 xychart-beta
     title "deepseek-r1:8b测试"
-    x-axis ["A770", "5060ti 16G", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
+    x-axis ["A770", "5060ti 16G", "5060", "4060ti 16G", "4060 laptop", "4050 laptop", "Tesla T4(1)", "Tesla T4(2)"]
     y-axis "每秒输出token数 tokens/s" 0 --> 80
     %% Green bar
-    bar [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    bar [51.38, 67.07, 63.86, 45.04, 43.08, 20.68, 31.91, 25.44]
     %% Blue bar
     bar [51.38]
-    line [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    line [51.38, 67.07, 63.86, 45.04, 43.08, 20.68, 31.91, 25.44]
 {% end %}
 
 ### Comfyui测试
@@ -459,12 +466,13 @@ xychart-beta
 | A770(2) | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+xpu | 9.04 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 15.05 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 11.14 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 8.59 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 8.59 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -487,12 +495,13 @@ xychart-beta
 | A770(2) | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+xpu | 2.30 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 3.05 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 2.11 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 1.63 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 1.63 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -517,12 +526,13 @@ xychart-beta
 | A770(2) | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+xpu | 1.70 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 1.70 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 1.29 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 0.98 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 0.98 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -548,12 +558,13 @@ xychart-beta
 | A770(2) | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+xpu | 4.11 |
 | 4060ti 16G | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 3.44 |
 | 4060 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 4.78 |
-| 4050 laptop | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 6.16 |
+| 4050 laptop [60w] | Ubuntu 24.04.3 LTS | 6.14.0-29-generic | 2.8.0+cu129 | 6.16 |
 
 {% mermaid() %}
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:

@@ -40,8 +40,8 @@
 &lt;p&gt;直接官网下载安装即可。我使用最新驱动，如果打游戏，应该去找找之前版本的驱动，因为A770驱动在2025年是负优化居多，而A770的游戏表现比较依赖驱动的优化。&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;linuxqu-dong&quot;&gt;Linux驱动&lt;&#x2F;h3&gt;
 &lt;p&gt;正常显示是没问题的，默认使用intel的i915开源驱动。
-以下驱动是为了满足使用A770在Linux上进行计算、推理和跑ai。
-对系统有要求：&lt;&#x2F;p&gt;
+以下是为了满足使用A770在Linux上进行计算、推理和跑ai。
+首先，对系统有要求：&lt;&#x2F;p&gt;
 &lt;ol&gt;
 &lt;li&gt;最好是内核6.0以上(not sure)
 使用以下命令查看。&lt;&#x2F;li&gt;
@@ -261,16 +261,19 @@ B站上找测评。&lt;&#x2F;li&gt;
 &lt;tr&gt;&lt;td&gt;A770(1)&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.16.7-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;20.0945&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;20.3105&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;5060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.17.2-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;20.2183&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;5060&lt;&#x2F;td&gt;&lt;td&gt;ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;23.0996&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;26.2080&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;33.8658&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;46.5181&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;33.4658&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;46.5181&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;49.9113&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu126&lt;&#x2F;td&gt;&lt;td&gt;50.2602&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;GTX 1650 laptop&lt;&#x2F;td&gt;&lt;td&gt;Linux Mint 22.2&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu126&lt;&#x2F;td&gt;&lt;td&gt;100.8302&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -278,13 +281,13 @@ config:
 ---
 xychart-beta
     title &amp;quot;脚本测试&amp;quot;
-    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    x-axis [&amp;quot;A770(1)&amp;quot;, &amp;quot;A770(2)&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;5060&amp;quot;,&amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;, &amp;quot;GTX 1650 laptop&amp;quot;]
     y-axis &amp;quot;跑完测试脚本所用时间 s&amp;quot; 0 --&amp;gt; 60
     %% Green bar
-    bar [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    bar [20.0945, 20.3105, 20.2183, 23.0996, 26.2080, 33.4658, 46.5181, 49.9113, 50.2602,100.8302 ]
     %% Blue bar
     bar [20.0945, 20.3105]
-    line [20.0945, 20.3105, 20.2183, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602]
+    line [20.0945, 20.3105, 20.2183, 23.0996, 26.2080, 33.8658, 46.5181, 49.9113, 50.2602,100.8302 ]
 &lt;&#x2F;pre&gt;
 &lt;p&gt;看起来xpu的速度还可以。&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;ollamace-shi&quot;&gt;ollama测试&lt;&#x2F;h3&gt;
@@ -307,16 +310,18 @@ xychart-beta
 &lt;p&gt;&lt;code&gt;tokens&#x2F;s&lt;&#x2F;code&gt;越大越好&lt;&#x2F;p&gt;
 &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;ollama版本&lt;&#x2F;th&gt;&lt;th&gt;tokens&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
 &lt;tr&gt;&lt;td&gt;A770&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.9.3(&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ipex-llm&#x2F;ipex-llm&#x2F;releases&#x2F;tag&#x2F;v2.3.0-nightly&quot;&gt;ipex-llm 2.3&lt;&#x2F;a&gt;)&lt;&#x2F;td&gt;&lt;td&gt;63.80&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;5060&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;72.07&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;50.91&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;48.67&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;26.09&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;34.40&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;26.09&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.3&lt;&#x2F;td&gt;&lt;td&gt;34.40&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;25.97&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -324,20 +329,21 @@ config:
 ---
 xychart-beta
     title &amp;quot;deepseek-r1:7b测试&amp;quot;
-    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;5060&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
     y-axis &amp;quot;每秒输出token数 tokens&amp;#x2F;s&amp;quot; 0 --&amp;gt; 80
     %% Green bar
-    bar [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    bar [63.80, 72.07, 50.91, 48.67, 26.09, 34.40, 25.97]
     %% Blue bar
     bar [63.80]
-    line [63.80, 50.91, 48.67, 26.09, 34.40, 25.97]
+    line [63.80, 72.07, 50.91, 48.67, 26.09, 34.40, 25.97]
 &lt;&#x2F;pre&gt;&lt;h4 id=&quot;deepseek-r1-8b&quot;&gt;deepseek-r1:8b&lt;&#x2F;h4&gt;
 &lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;代称&lt;&#x2F;th&gt;&lt;th&gt;Linux发行版&lt;&#x2F;th&gt;&lt;th&gt;Linux内核&lt;&#x2F;th&gt;&lt;th&gt;ollama版本&lt;&#x2F;th&gt;&lt;th&gt;tokens&#x2F;s&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
 &lt;tr&gt;&lt;td&gt;A770&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.9.3(&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ipex-llm&#x2F;ipex-llm&#x2F;releases&#x2F;tag&#x2F;v2.3.0-nightly&quot;&gt;ipex-llm 2.3&lt;&#x2F;a&gt;)&lt;&#x2F;td&gt;&lt;td&gt;51.38&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;5060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;CachyOS&lt;&#x2F;td&gt;&lt;td&gt;6.17.2-2-cachyos&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;67.07&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;5060&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.3&lt;&#x2F;td&gt;&lt;td&gt;63.86&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;45.04&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;43.08&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;20.68&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.11.10&lt;&#x2F;td&gt;&lt;td&gt;20.68&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;Tesla T4(1)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 20.04.6 LTS&lt;&#x2F;td&gt;&lt;td&gt;5.4.0-166-generic&lt;&#x2F;td&gt;&lt;td&gt;v0.12.2&lt;&#x2F;td&gt;&lt;td&gt;31.91&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;Tesla T4(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 22.04.5 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.6.97+&lt;&#x2F;td&gt;&lt;td&gt;v0.12.10&lt;&#x2F;td&gt;&lt;td&gt;25.44&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
@@ -345,6 +351,7 @@ xychart-beta
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -352,13 +359,13 @@ config:
 ---
 xychart-beta
     title &amp;quot;deepseek-r1:8b测试&amp;quot;
-    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
+    x-axis [&amp;quot;A770&amp;quot;, &amp;quot;5060ti 16G&amp;quot;, &amp;quot;5060&amp;quot;, &amp;quot;4060ti 16G&amp;quot;, &amp;quot;4060 laptop&amp;quot;, &amp;quot;4050 laptop&amp;quot;, &amp;quot;Tesla T4(1)&amp;quot;, &amp;quot;Tesla T4(2)&amp;quot;]
     y-axis &amp;quot;每秒输出token数 tokens&amp;#x2F;s&amp;quot; 0 --&amp;gt; 80
     %% Green bar
-    bar [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    bar [51.38, 67.07, 63.86, 45.04, 43.08, 20.68, 31.91, 25.44]
     %% Blue bar
     bar [51.38]
-    line [51.38, 67.07, 45.04, 43.08, 20.68, 31.91, 25.44]
+    line [51.38, 67.07, 63.86, 45.04, 43.08, 20.68, 31.91, 25.44]
 &lt;&#x2F;pre&gt;&lt;h3 id=&quot;comfyuice-shi&quot;&gt;Comfyui测试&lt;&#x2F;h3&gt;
 &lt;p&gt;连续执行10次绘画任务，去除极端值取平均值。
 不考虑模型加载时间，仅测试比较其每秒迭代多少次即迭代速度(it&#x2F;s)。&lt;&#x2F;p&gt;
@@ -372,12 +379,13 @@ xychart-beta
 &lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;9.04&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;15.05&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;11.14&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;8.59&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;8.59&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -397,12 +405,13 @@ xychart-beta
 &lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;2.30&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;3.05&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;2.11&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.63&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.63&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -424,12 +433,13 @@ xychart-beta
 &lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;1.70&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.70&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;1.29&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;0.98&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;0.98&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
@@ -452,12 +462,13 @@ xychart-beta
 &lt;tr&gt;&lt;td&gt;A770(2)&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+xpu&lt;&#x2F;td&gt;&lt;td&gt;4.11&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060ti 16G&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;3.44&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;tr&gt;&lt;td&gt;4060 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;4.78&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
-&lt;tr&gt;&lt;td&gt;4050 laptop&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;6.16&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;4050 laptop [60w]&lt;&#x2F;td&gt;&lt;td&gt;Ubuntu 24.04.3 LTS&lt;&#x2F;td&gt;&lt;td&gt;6.14.0-29-generic&lt;&#x2F;td&gt;&lt;td&gt;2.8.0+cu129&lt;&#x2F;td&gt;&lt;td&gt;6.16&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
 &lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
 &lt;pre class=&quot;mermaid&quot;&gt;
 ---
 config:
   xyChart:
+    chartOrientation: horizontal
     showDataLabel: true
   themeVariables:
     xyChart:
