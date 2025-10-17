@@ -8,6 +8,106 @@
     <updated>2025-10-17T00:00:00+00:00</updated>
     <id>https://blog.0pt.icu/atom.xml</id>
     <entry xml:lang="en">
+        <title>My NixOS NAS🧊 (2)</title>
+        <published>2025-10-17T00:00:00+00:00</published>
+        <updated>2025-10-17T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              antipeth
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.0pt.icu/posts/homelab-nixos-nas-2/"/>
+        <id>https://blog.0pt.icu/posts/homelab-nixos-nas-2/</id>
+        
+        <content type="html" xml:base="https://blog.0pt.icu/posts/homelab-nixos-nas-2/">&lt;h1 id=&quot;my-nixos-nasice-cube-2&quot;&gt;My NixOS NAS🧊 (2)&lt;&#x2F;h1&gt;
+&lt;p&gt;2025-10-17&lt;&#x2F;p&gt;
+&lt;p&gt;You can find &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;antipeth&#x2F;atplab&quot;&gt;my configuration here&lt;&#x2F;a&gt;.
+You can find &lt;a href=&quot;https:&#x2F;&#x2F;blog.0pt.icu&#x2F;posts&#x2F;homelab-nixos-nas&#x2F;&quot;&gt;my previous article here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;magic-wand-introduction&quot;&gt;🪄 Introduction&lt;&#x2F;h2&gt;
+&lt;p&gt;Back in &lt;strong&gt;March&lt;&#x2F;strong&gt;, I built my NAS using &lt;strong&gt;NixOS&lt;&#x2F;strong&gt;, and it’s been running &lt;strong&gt;rock-solid&lt;&#x2F;strong&gt; ever since 💪.
+However, this August I made some big hardware and backup changes. For some reason, I bought an extra &lt;strong&gt;32 GB RAM stick&lt;&#x2F;strong&gt;, bringing my NAS’s total memory to &lt;strong&gt;40 GB&lt;&#x2F;strong&gt; 🧠.&lt;&#x2F;p&gt;
+&lt;p&gt;I also purchased a &lt;strong&gt;Western Digital HC620 zoned mechanical drive (SMR)&lt;&#x2F;strong&gt; — &lt;strong&gt;14 TB&lt;&#x2F;strong&gt; — to store my static media files 🎬.
+I couldn’t format this drive using &lt;code&gt;nixos disko&lt;&#x2F;code&gt;, but &lt;code&gt;mkfs&lt;&#x2F;code&gt; worked perfectly, and mounting it with &lt;code&gt;filesystem&lt;&#x2F;code&gt; caused no conflicts at all.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Name&lt;&#x2F;th&gt;&lt;th&gt;Content&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Motherboard&lt;&#x2F;td&gt;&lt;td&gt;GIGABYTE A520i Dash&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;CPU&lt;&#x2F;td&gt;&lt;td&gt;R5 5600G&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Memory&lt;&#x2F;td&gt;&lt;td&gt;8 GB + 32 GB DDR4&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SSD&lt;&#x2F;td&gt;&lt;td&gt;512 GB NVMe PCIe 3 × 4&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;HDD&lt;&#x2F;td&gt;&lt;td&gt;2 × 1 TB&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;HDD&lt;&#x2F;td&gt;&lt;td&gt;14 TB&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;Because my &lt;strong&gt;dorm cuts power every night&lt;&#x2F;strong&gt; 🔌, I can’t keep the mechanical drives constantly connected — it would wear them out too fast.
+So I turned them into &lt;strong&gt;cold backups&lt;&#x2F;strong&gt;, doing a scheduled sync &lt;strong&gt;once per month&lt;&#x2F;strong&gt; 🧊.
+Of course, my local data is still &lt;strong&gt;backed up to S3 daily&lt;&#x2F;strong&gt; ☁️.&lt;&#x2F;p&gt;
+&lt;p&gt;I also bought a &lt;strong&gt;VPS&lt;&#x2F;strong&gt; to host my online services 🌐.&lt;&#x2F;p&gt;
+&lt;p&gt;So, it was time to &lt;strong&gt;rebuild my NixOS NAS&lt;&#x2F;strong&gt; — transforming it into a proper &lt;strong&gt;NixOS-based homelab environment&lt;&#x2F;strong&gt; 🧰.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;construction-site-rebuild&quot;&gt;🏗️ Rebuild&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;repeat-replacing-clan-with-nixos-rebuild&quot;&gt;🔁 Replacing &lt;code&gt;clan&lt;&#x2F;code&gt; with &lt;code&gt;nixos-rebuild&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;In my previous article, I highly recommended the &lt;code&gt;clan&lt;&#x2F;code&gt; tool.
+Unfortunately… I’ve decided to drop it 😅.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Since March, &lt;code&gt;clan&lt;&#x2F;code&gt; has had major updates — mostly around the &lt;code&gt;inventory&lt;&#x2F;code&gt; system. But I don’t really need that; I want my setup to stay &lt;strong&gt;as close to pure NixOS&lt;&#x2F;strong&gt; as possible.&lt;&#x2F;li&gt;
+&lt;li&gt;One big reason I originally used &lt;code&gt;clan&lt;&#x2F;code&gt; was for &lt;strong&gt;multi-host deployment&lt;&#x2F;strong&gt; and management. But after an update, I found that when deploying just one machine, &lt;code&gt;clan&lt;&#x2F;code&gt; still &lt;strong&gt;checks the configuration of all machines&lt;&#x2F;strong&gt; — which conflicts with my &lt;strong&gt;SOPS-encrypted values and secrets&lt;&#x2F;strong&gt; approach 🔐.&lt;&#x2F;li&gt;
+&lt;li&gt;Also, even though I configure my network through &lt;code&gt;networking&lt;&#x2F;code&gt; and &lt;em&gt;not&lt;&#x2F;em&gt; &lt;code&gt;systemd-network&lt;&#x2F;code&gt;, &lt;code&gt;clan&lt;&#x2F;code&gt; still automatically enables it 🤔. This isn’t a big issue locally or on some VPSs, but on certain ones it &lt;strong&gt;completely breaks IPv6&lt;&#x2F;strong&gt; 💥.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;&lt;code&gt;clan&lt;&#x2F;code&gt; is a great project — just not the right fit for me anymore.
+So I switched back to the good old &lt;strong&gt;&lt;code&gt;nixos-rebuild&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; 🧱.&lt;&#x2F;p&gt;
+&lt;p&gt;For multi-machine deployment, I now use a &lt;strong&gt;Justfile&lt;&#x2F;strong&gt; with scripts that dynamically insert the hostname using &lt;code&gt;seq&lt;&#x2F;code&gt;, and I simply &lt;strong&gt;avoid committing these transient changes&lt;&#x2F;strong&gt; to Git 🧹.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h3 id=&quot;lock-using-nixos-sops&quot;&gt;🔒 Using &lt;code&gt;nixos-sops&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;Previously, I used the SOPS integration built into &lt;code&gt;clan&lt;&#x2F;code&gt;.
+Now I use &lt;strong&gt;SOPS directly&lt;&#x2F;strong&gt;, with a cleaner directory structure for encryption 🔧.&lt;&#x2F;p&gt;
+&lt;p&gt;Let’s look at what changed 👇&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Before (with &lt;code&gt;clan&lt;&#x2F;code&gt;):&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Secrets were stored in &lt;code&gt;sops&#x2F;secrets&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Encrypted values or strings were stored in &lt;code&gt;sops&#x2F;eval&#x2F;&amp;lt;machine-name&amp;gt;&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;After the rebuild:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Secrets are now stored in &lt;code&gt;machines&#x2F;&amp;lt;machine-name&amp;gt;&#x2F;secrets&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Encrypted values or strings are now stored in &lt;code&gt;machines&#x2F;&amp;lt;machine-name&amp;gt;&#x2F;values&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;You can find my related article about SOPS encryption here. 👇&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.0pt.icu&#x2F;posts&#x2F;nixos-sops-nix-quick-start-guide&#x2F;&quot;&gt;Sops-nix Quick Start Guide&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.0pt.icu&#x2F;posts&#x2F;nixos-using-sops-to-encrypt-nix-values&#x2F;&quot;&gt;Using SOPS to Encrypt Nix Values&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This makes import paths in Nix much simpler ✨.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h3 id=&quot;closed-lock-with-key-switching-from-acme-certificates-to-self-signed-certificates&quot;&gt;🔐 Switching from ACME Certificates to Self-Signed Certificates&lt;&#x2F;h3&gt;
+&lt;p&gt;At first, my NixOS NAS used &lt;strong&gt;ACME&lt;&#x2F;strong&gt; certificates, integrated nicely with Nginx.
+But once I added a VPS, I needed a way to &lt;strong&gt;distribute certificates&lt;&#x2F;strong&gt; among machines 📨.&lt;&#x2F;p&gt;
+&lt;p&gt;Here was my initial idea 💭:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;The VPS runs a &lt;strong&gt;Headscale&lt;&#x2F;strong&gt; server, and both cloud and local machines join the Headscale network 🕸️.&lt;&#x2F;li&gt;
+&lt;li&gt;The VPS obtains certificates via &lt;strong&gt;ACME&lt;&#x2F;strong&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;The VPS uses &lt;strong&gt;rclone&lt;&#x2F;strong&gt; to encrypt and store the certs in another local directory.&lt;&#x2F;li&gt;
+&lt;li&gt;Nginx on the VPS serves an &lt;strong&gt;HTTPS static file server&lt;&#x2F;strong&gt; (inside the Headscale network, using the domain generated by &lt;code&gt;magic_dns&lt;&#x2F;code&gt;) 🌐.&lt;&#x2F;li&gt;
+&lt;li&gt;Other machines use &lt;strong&gt;rclone’s HTTP backend&lt;&#x2F;strong&gt; to periodically pull and decrypt the certs locally 🔁.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;But when I actually started setting it up… I got lazy 😆.
+So I just went with &lt;strong&gt;self-signed certificates&lt;&#x2F;strong&gt; — zero maintenance required.&lt;&#x2F;p&gt;
+&lt;p&gt;For local services, that’s perfectly fine ✅.
+For cloud services, combining &lt;strong&gt;self-signed certs + CDN&lt;&#x2F;strong&gt; is totally enough for a personal &lt;strong&gt;homelab&lt;&#x2F;strong&gt; setup 🏠.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h3 id=&quot;jigsaw-other-improvements&quot;&gt;🧩 Other Improvements&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;☁️ Added Headscale in the cloud to manage all devices within a private network.&lt;&#x2F;li&gt;
+&lt;li&gt;🗂️ Reorganized the &lt;strong&gt;directory structure&lt;&#x2F;strong&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;🌀 Used a &lt;strong&gt;recursive import function&lt;&#x2F;strong&gt; (&lt;code&gt;lib.filesystem.listFilesRecursive&lt;&#x2F;code&gt;) to simplify Nix code.&lt;&#x2F;li&gt;
+&lt;li&gt;📁 All example service modules are now stored under &lt;code&gt;machines&#x2F;example&#x2F;modules&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
         <title>Sops-nix Quick Start Guide</title>
         <published>2025-10-17T00:00:00+00:00</published>
         <updated>2025-10-17T00:00:00+00:00</updated>
