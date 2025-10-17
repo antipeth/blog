@@ -1,0 +1,152 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>Using SOPS to Encrypt Nix Values</h1><span>2025-10-17</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#using-sops-to-encrypt-nix-values>Using SOPS to Encrypt Nix Values</a> <ul><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#jigsaw-introduction>🧩 Introduction</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#concept>Concept</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#gear-installing-sops>⚙️ Installing sops</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#receipt-create-a-sops-yaml-configuration>🧾 Create a .sops.yaml Configuration</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#memo-create-plaintext-nix-values>📝 Create Plaintext Nix Values</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#lock-encrypt>🔒 Encrypt</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#bricks-optional-commit-to-git>🧱 (Optional) Commit to Git</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#unlock-decrypt-before-deployment>🔓 Decrypt Before Deployment</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#rocket-deploy-the-system>🚀 Deploy the System</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#closed-lock-with-key-re-encrypt-after-deployment>🔐 Re-encrypt After Deployment</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#floppy-disk-optional-commit-again>💾 (Optional) Commit Again</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#tools-modify-or-add-plaintext-values>🛠️ Modify or Add Plaintext Values</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#zap-automating-the-workflow-with-justfile>⚡ Automating the Workflow with Justfile</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#warning-limitations>⚠️ Limitations</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#bricks-example-project-structure>🧱 Example Project Structure</a><li><a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/#white-check-mark-conclusion>✅ Conclusion</a></ul></ul></div><div class=post-content><h1 id=using-sops-to-encrypt-nix-values>Using SOPS to Encrypt Nix Values</h1><h2 id=jigsaw-introduction>🧩 Introduction</h2><p>In some NixOS configurations, we may need to store sensitive information, such as:<ul><li>VPS IPv4 / IPv6 addresses;<li>Certain private configuration values;<li>Or internal parameters that should not be exposed publicly.</ul><p>After studying <a href=https://github.com/Mic92/sops-nix>sops-nix</a>, I realized that <strong>sops-nix only supports file-level encryption</strong> — it cannot encrypt individual Nix values.<p>These values are often needed <strong>during the system build phase</strong>, but <code>sops-nix</code> decrypts only <strong>after the system has booted</strong>, meaning that during the build phase, the encrypted files remain ciphertext.<p>This means that sensitive values still <strong>appear in plaintext in <code>/nix/store</code></strong>. While files encrypted by <code>sops-nix</code> remain protected at that stage, any Nix expression containing secrets will be fully visible.<p>So, from a security standpoint, 👉 <strong>the following approach is merely a workaround</strong>. If <code>sops-nix</code> can be used, it’s always preferable — as it’s more secure by design.<hr><h2 id=concept>Concept</h2><p>This approach was originally suggested by <a href=https://github.com/yonzilch>@yonzilch</a> — much appreciated 🙏.<p>The <strong>core idea</strong> is:<blockquote><p>Store sensitive values as individual <code>.nix</code> files, then encrypt those files using <code>sops</code>.</blockquote><h3 id=example-define-an-ssh-port>✳️ Example: Define an SSH Port</h3><p>Create a file named <code>forgejo-ssh-port.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#d08770>223
+</span></code></pre><p>Then reference it inside <code>forgejo.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#bf616a>services</span><span>.</span><span style=color:#bf616a>forgejo </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> {
+</span><span>  </span><span style=color:#65737e># ...
+</span><span>  </span><span style=color:#d08770>settings </span><span>= {
+</span><span>    </span><span style=color:#d08770>server </span><span>= {
+</span><span>      </span><span style=color:#65737e># ...
+</span><span>      </span><span style=color:#d08770>SSH_PORT </span><span>= </span><span style=color:#96b5b4>import </span><span style=color:#a3be8c>path/to/forgejo-ssh-port.nix</span><span>;
+</span><span>      </span><span style=color:#65737e># ...
+</span><span>    };
+</span><span>  };
+</span><span>}</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><hr><h3 id=example-define-a-url>✳️ Example: Define a URL</h3><p>Create <code>headscale-server-url.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span>"</span><span style=color:#a3be8c>https://headscale.example.com</span><span>"
+</span></code></pre><p>Then reference it in <code>headscale.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#bf616a>services </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> {
+</span><span>  </span><span style=color:#d08770>headscale </span><span>= {
+</span><span>    </span><span style=color:#65737e># ...
+</span><span>    </span><span style=color:#d08770>settings </span><span>= {
+</span><span>      </span><span style=color:#65737e># ...
+</span><span>      </span><span style=color:#d08770>server_url </span><span>= </span><span style=color:#96b5b4>import </span><span style=color:#a3be8c>path/to/headscale-server-url.nix</span><span>;
+</span><span>    };
+</span><span>  };
+</span><span>}</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><hr><h3 id=example-define-a-complex-structure>✳️ Example: Define a Complex Structure</h3><p>Create <code>headscale-dns-settings.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span>{
+</span><span>  </span><span style=color:#d08770>nameservers</span><span>.</span><span style=color:#d08770>global </span><span>= [
+</span><span>    "</span><span style=color:#a3be8c>127.0.0.1</span><span>"
+</span><span>    "</span><span style=color:#a3be8c>::1</span><span>"
+</span><span>  ];
+</span><span>  </span><span style=color:#d08770>magic_dns </span><span>= </span><span style=color:#d08770>true</span><span>;
+</span><span>  </span><span style=color:#d08770>base_domain </span><span>= </span><span style=color:#bf616a>test</span><span>;
+</span><span>}
+</span></code></pre><p>Then reference it in <code>headscale.nix</code>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#bf616a>services </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> {
+</span><span>  </span><span style=color:#d08770>headscale </span><span>= {
+</span><span>    </span><span style=color:#65737e># ...
+</span><span>    </span><span style=color:#d08770>settings </span><span>= {
+</span><span>      </span><span style=color:#d08770>dns </span><span>= </span><span style=color:#96b5b4>import </span><span style=color:#a3be8c>path/to/headscale-dns-settings.nix</span><span>;
+</span><span>      </span><span style=color:#65737e># ...
+</span><span>    };
+</span><span>  };
+</span><span>}</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><hr><p>📘 <strong>To summarize:</strong><ul><li>Any Nix value — string, number, list, or attribute set — can exist as a separate <code>.nix</code> file;<li>Decrypt before deployment, re-encrypt afterward;<li>Use <code>sops</code> for all encryption/decryption operations;<li>Encrypted files can be safely committed to your Git repository.</ul><p>To simplify this process, you can automate encryption/decryption and deployment with a script or a <code>just</code> recipe.<hr><h2 id=gear-installing-sops>⚙️ Installing sops</h2><p>Install manually:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix-shell -p</span><span> sops
+</span></code></pre><hr><h2 id=receipt-create-a-sops-yaml-configuration>🧾 Create a <code>.sops.yaml</code> Configuration</h2><p>If you haven’t yet read my other article 👉 <a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/>Quickstart Guide to sops-nix</a>, I highly recommend doing so first — it explains <code>.sops.yaml</code> in detail.<p>At your repository root, create <code>.sops.yaml</code>:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>values/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>      - </span><span style=color:#bf616a>age</span><span>:
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span></code></pre><p>This configuration specifies that:<ul><li>All files under the <code>values/</code> directory can be encrypted/decrypted by <code>sops</code>;<li>The <code>admin_alice</code> key is used (only locally — you don’t need your server’s public key).</ul><hr><h2 id=memo-create-plaintext-nix-values>📝 Create Plaintext Nix Values</h2><p>Create plaintext sensitive value files under <code>values/</code>:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>vim</span><span> values/forgejo-ssh-port.nix
+</span><span style=color:#bf616a>vim</span><span> values/headscale-server-url.nix
+</span><span style=color:#bf616a>vim</span><span> values/headscale-dns-settings.nix
+</span><span style=color:#65737e># ...
+</span></code></pre><hr><h2 id=lock-encrypt>🔒 Encrypt</h2><p>Run:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ls</span><span> values/* | </span><span style=color:#bf616a>xargs -n</span><span> 1 sops encrypt</span><span style=color:#bf616a> -i
+</span></code></pre><hr><h2 id=bricks-optional-commit-to-git>🧱 (Optional) Commit to Git</h2><p>Once confirmed, you can safely commit the encrypted files:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>git</span><span> add values/
+</span><span style=color:#bf616a>git</span><span> commit</span><span style=color:#bf616a> -m </span><span>"</span><span style=color:#a3be8c>add some values</span><span>"
+</span></code></pre><hr><h2 id=unlock-decrypt-before-deployment>🔓 Decrypt Before Deployment</h2><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ls</span><span> values/* | </span><span style=color:#bf616a>xargs -n</span><span> 1 sops decrypt</span><span style=color:#bf616a> -i
+</span></code></pre><hr><h2 id=rocket-deploy-the-system>🚀 Deploy the System</h2><p>Normal deployment command:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nixos-rebuild</span><span> switch ...
+</span></code></pre><hr><h2 id=closed-lock-with-key-re-encrypt-after-deployment>🔐 Re-encrypt After Deployment</h2><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ls</span><span> values/* | </span><span style=color:#bf616a>xargs -n</span><span> 1 sops encrypt</span><span style=color:#bf616a> -i
+</span></code></pre><hr><h2 id=floppy-disk-optional-commit-again>💾 (Optional) Commit Again</h2><p>If the values are correct:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>git</span><span> add values/
+</span><span style=color:#bf616a>git</span><span> commit</span><span style=color:#bf616a> -m </span><span>"</span><span style=color:#a3be8c>add some values</span><span>"
+</span></code></pre><hr><h2 id=tools-modify-or-add-plaintext-values>🛠️ Modify or Add Plaintext Values</h2><p>First, decrypt the encrypted files:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ls</span><span> values/* | </span><span style=color:#bf616a>xargs -n</span><span> 1 sops decrypt</span><span style=color:#bf616a> -i
+</span></code></pre><p>Then edit or add new plaintext <code>.nix</code> files. Afterward, re-encrypt them:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ls</span><span> values/* | </span><span style=color:#bf616a>xargs -n</span><span> 1 sops encrypt</span><span style=color:#bf616a> -i
+</span></code></pre><hr><h2 id=zap-automating-the-workflow-with-justfile>⚡ Automating the Workflow with Justfile</h2><p>You can easily wrap the above steps into scripts or automation tools. Here we’ll use <a href=https://github.com/casey/just>just</a>.<p>Install <code>just</code>:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix-shell -p</span><span> just
+</span></code></pre><p>At your repo root, create a <code>justfile</code>:<pre class=language-justfile data-lang=justfile style=color:#c0c5ce;background-color:#2b303b><code class=language-justfile data-lang=justfile><span>set shell := ["bash", "-c"]
+</span><span>
+</span><span>encrypt:
+</span><span>  ls values/* | xargs -n 1 sops encrypt -i
+</span><span>
+</span><span>decrypt:
+</span><span>  ls values/* | xargs -n 1 sops decrypt -i
+</span><span>
+</span><span>deploy:
+</span><span>  ls values/* | xargs -n 1 sops decrypt -i ; git add . ; nixos-rebuild switch ... ; ls values/* | xargs -n 1 sops encrypt -i
+</span></code></pre><p>Usage:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>just</span><span> encrypt  </span><span style=color:#65737e># Encrypt all
+</span><span style=color:#bf616a>just</span><span> decrypt  </span><span style=color:#65737e># Decrypt all
+</span><span style=color:#bf616a>just</span><span> deploy   </span><span style=color:#65737e># Auto decrypt + deploy + re-encrypt
+</span></code></pre><hr><h2 id=warning-limitations>⚠️ Limitations</h2><ol><li><p>🧩 <strong>Non-native solution</strong> — a workaround that requires extra manual steps;</p><li><p>🧠 <strong>Prone to mistakes</strong> — you might accidentally commit plaintext secrets to Git;</p><li><p>🔄 <strong>Frequent ciphertext changes</strong> — every time you re-encrypt, ciphertext differs, cluttering Git history. You can avoid this by discarding those diffs with:</p> <pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>git</span><span> reset</span><span style=color:#bf616a> --hard</span><span> HEAD</span><span style=color:#bf616a>~</span><span>1
+</span></code></pre></ol><hr><h2 id=bricks-example-project-structure>🧱 Example Project Structure</h2><p>Here’s my personal layout for reference:<pre style=color:#c0c5ce;background-color:#2b303b><code><span>nix-config
+</span><span>├── .sops.yaml
+</span><span>├── flake.lock
+</span><span>├── flake.nix
+</span><span>├── Justfile
+</span><span>├── machines
+</span><span>│   ├── homelab1
+</span><span>│   │   ├── default.nix
+</span><span>│   │   ├── disko.nix
+</span><span>│   │   ├── hardware.nix
+</span><span>│   │   ├── modules
+</span><span>│   │   │   ├── forgejo.nix
+</span><span>│   │   │   └── headscale.nix
+</span><span>│   │   ├── values
+</span><span>│   │   │   ├── forgejo-ssh-port.nix
+</span><span>│   │   │   ├── headscale-dns-settings.nix
+</span><span>│   │   │   └── headscale-server-url.nix
+</span><span>│   │   └── user.nix
+</span><span>│   └── homelab2
+</span><span>│       ├── default.nix
+</span><span>│       ├── disko.nix
+</span><span>│       ├── hardware.nix
+</span><span>│       ├── modules
+</span><span>│       │   ├── forgejo.nix
+</span><span>│       │   └── headscale.nix
+</span><span>│       ├── values
+</span><span>│       │   ├── forgejo-ssh-port.nix
+</span><span>│       │   ├── headscale-dns-settings.nix
+</span><span>│       │   └── headscale-server-url.nix
+</span><span>│       └── user.nix
+</span><span>├── modules
+</span><span>│   ├── options
+</span><span>│   ├── services
+</span><span>│   └── system
+</span><span>└── README.md
+</span></code></pre><hr><p>My <code>.sops.yaml</code>:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>machines/homelab1/values/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>      - </span><span style=color:#bf616a>age</span><span>:
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>machines/homelab2/values/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>      - </span><span style=color:#bf616a>age</span><span>:
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span></code></pre><p>My <code>justfile</code>:<pre class=language-justfile data-lang=justfile style=color:#c0c5ce;background-color:#2b303b><code class=language-justfile data-lang=justfile><span># use bash for shell commands
+</span><span>set shell := ["bash", "-c"]
+</span><span>
+</span><span># Set hostname environment
+</span><span>hostname := `hostname`
+</span><span>
+</span><span>deploy input:
+</span><span>  # Perform remote deploy action
+</span><span>  ls machines/{{input}}/values/* | xargs -n 1 sops decrypt -i ; sed -i "/^\s*hostname[[:space:]]*=[[:space:]]*\"/s/\"\(.*\)\"/\"{{input}}\"/" ./flake.nix ; git add . ; nixos-rebuild-ng switch --flake .#{{input}} --build-host root@{{input}} --target-host root@{{input}} -v ; ls machines/{{input}}/values/* | xargs -n 1 sops encrypt -i
+</span><span>
+</span><span>de input:
+</span><span>  # Decrypt
+</span><span>  ls machines/{{input}}/values/* | xargs -n 1 sops decrypt -i
+</span><span>
+</span><span>en input:
+</span><span>  # Encrypt
+</span><span>  ls machines/{{input}}/values/* | xargs -n 1 sops encrypt -i
+</span></code></pre><p>🧠 <strong>Key points:</strong> You need to customize the hostname field matching scheme in your own <code>flake.nix</code>. Use <code>sed</code> to dynamically replace the hostname in <code>flake.nix</code>, and use <code>{{input}}</code> to substitute the hostname in the <code>just</code> command:<pre style=color:#c0c5ce;background-color:#2b303b><code><span>sed -i "/^\s*hostname[[:space:]]*=[[:space:]]*\"/s/\"\(.*\)\"/\"{{input}}\"/" ./flake.nix
+</span></code></pre><p>Examples:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>just</span><span> de homelab1     </span><span style=color:#65737e># Decrypt all encrypted nix values in machines/homelab1/values/
+</span><span style=color:#bf616a>just</span><span> en homelab1     </span><span style=color:#65737e># Encrypt all nix values in machines/homelab1/values/
+</span><span style=color:#bf616a>just</span><span> deploy homelab1 </span><span style=color:#65737e># Auto decrypt + replace hostname + deploy homelab1
+</span><span>
+</span><span style=color:#bf616a>just</span><span> de homelab2
+</span><span style=color:#bf616a>just</span><span> en homelab2
+</span><span style=color:#bf616a>just</span><span> deploy homelab2
+</span></code></pre><hr><h2 id=white-check-mark-conclusion>✅ Conclusion</h2><p>With this approach, you can:<ul><li>Use <code>sops</code> to encrypt any Nix value;<li>Safely import sensitive data during the build phase;<li>Automate encryption/decryption and deployment with <code>just</code>;<li>Keep your configuration repository tidy and secure.</ul><p>🧊 While this isn’t a perfect solution, it’s a <strong>practical and elegant compromise</strong> for cases where you need Nix-level secret handling.</div></div><script type=module>import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({ theme: 'neutral',});</script>

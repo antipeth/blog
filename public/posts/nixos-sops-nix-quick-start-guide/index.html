@@ -1,0 +1,177 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content=你在世纪大道东门 name=description><link href=/main.css rel=stylesheet><script src=/js/theme-toggle.js></script><script>document.documentElement.classList.toggle('dark-mode', 
+            localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        );</script><title>世纪大道</title><link href=/favicon.ico rel=icon type=image/x-icon><script defer src=/js/posts/copy2clipboard.js></script><body><header><nav><a href=https://blog.0pt.icu/atom.xml>/rss</a><a href=https://blog.0pt.icu>/home</a><a href=https://blog.0pt.icu/posts>/posts</a><a href=https://blog.0pt.icu/links>/links</a><a href=https://blog.0pt.icu/about>/about</a></nav><div class=theme-toggle-container><input aria-label=theme-toggle class=checkbox id=checkbox type=checkbox><label class=checkbox-label for=checkbox><span class=ball></span></label></div></header><div><h1>Sops-nix Quick Start Guide</h1><span>2025-10-17</span><div class=toc><ul><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#sops-nix-quick-start-guide>Sops-nix Quick Start Guide</a> <ul><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#blue-book-introduction>📘 Introduction</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#jigsaw-importing-the-sops-nix-module>🧩 Importing the sops-nix Module</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#key-generate-your-personal-age-key>🔑 Generate Your Personal age Key</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#desktop-generate-an-age-key-for-the-nixos-server-optional>🖥️ Generate an age Key for the NixOS Server (optional)</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#gear-add-a-sops-yaml-configuration-file>⚙️ Add a .sops.yaml Configuration File</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#magic-wand-create-your-first-encrypted-file>🪄 Create Your First Encrypted File</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#pencil2-modify-an-existing-secret>✏️ Modify an Existing Secret</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#brain-use-the-secret-in-nixos>🧠 Use the Secret in NixOS</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#crown-encrypting-root-password-hash>👑 Encrypting Root Password Hash</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#dividers-example-personal-project-structure>🗂️ Example Personal Project Structure</a><li><a href=https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/#white-check-mark-summary>✅ Summary</a></ul></ul></div><div class=post-content><h1 id=sops-nix-quick-start-guide>Sops-nix Quick Start Guide</h1><h2 id=blue-book-introduction>📘 Introduction</h2><p>This article provides a simple guide to using <a href=https://github.com/Mic92/sops-nix>sops-nix</a>.<p>It’s written for those who “don’t fully understand the official documentation but still want to use sops-nix to encrypt secrets” (like me when I first started 😅). The goal is to use it in the simplest, most intuitive way. For advanced usage, please refer to the official documentation.<blockquote><p>⚠️ <strong>Note!!!</strong> <code>sops-nix</code> can only be used for <strong>file-level encryption</strong>, not for encrypting single values, strings, or booleans directly. In short, it is suitable for configuration options that <strong>expect a file path</strong>.</blockquote><p>For example:<ul><li>🔑 Wakapi’s <a href=https://mynixos.com/nixpkgs/option/services.wakapi.passwordSaltFile>passwordSaltFile</a><li>🔒 Restic’s <a href=https://mynixos.com/nixpkgs/option/services.restic.backups.%3Cname%3E.environmentFile>environmentFile</a>, <a href=https://mynixos.com/nixpkgs/option/services.restic.backups.%3Cname%3E.passwordFile>passwordFile</a>, and <a href=https://mynixos.com/nixpkgs/option/services.restic.backups.%3Cname%3E.repositoryFile>repositoryFile</a></ul><p>During the system build, <strong>sops-nix uses Nix to pass encrypted files</strong>, and after boot, it automatically decrypts them into <code>/run/secrets</code> (a temporary directory) for services to read. It’s generally used for environment variables, passwords, and other sensitive data—making them safe to store in Git repositories while maintaining system security.<p>💡 If you’re looking for a way to <strong>encrypt individual numbers, strings, booleans, or even inline Nix configurations</strong>, check out <a href=https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/>my other article</a> which introduces a clever method using sops.<hr><h2 id=jigsaw-importing-the-sops-nix-module>🧩 Importing the <code>sops-nix</code> Module</h2><p>As shown in the official guide, you’ll need to add the <code>sops-nix</code> module to your flake configuration. Add it to <code>inputs</code>, and import it in <code>modules</code> as <code>sops-nix.nixosModules.sops</code>.<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span>{
+</span><span>  </span><span style=color:#d08770>inputs</span><span>.</span><span style=color:#d08770>sops-nix</span><span>.</span><span style=color:#d08770>url </span><span>= "</span><span style=color:#a3be8c>github:Mic92/sops-nix</span><span>";
+</span><span>  </span><span style=color:#d08770>inputs</span><span>.</span><span style=color:#d08770>sops-nix</span><span>.</span><span style=color:#d08770>inputs</span><span>.</span><span style=color:#d08770>nixpkgs</span><span>.</span><span style=color:#d08770>follows </span><span>= "</span><span style=color:#a3be8c>nixpkgs</span><span>";
+</span><span>
+</span><span>  </span><span style=color:#d08770>outputs </span><span>= </span><span style=color:#8fa1b3>{ </span><span>self, nixpkgs, sops-nix </span><span style=color:#8fa1b3>}</span><span>: {
+</span><span>    </span><span style=color:#d08770>nixosConfigurations</span><span>.</span><span style=color:#d08770>yourhostname </span><span>= </span><span style=color:#bf616a>nixpkgs</span><span>.</span><span style=color:#bf616a>lib</span><span>.</span><span style=color:#bf616a>nixosSystem </span><span>{
+</span><span>      </span><span style=color:#d08770>system </span><span>= "</span><span style=color:#a3be8c>x86_64-linux</span><span>";
+</span><span>      </span><span style=color:#d08770>modules </span><span>= [
+</span><span>        </span><span style=color:#a3be8c>./configuration.nix
+</span><span>        </span><span style=color:#bf616a>sops-nix</span><span>.</span><span style=color:#bf616a>nixosModules</span><span>.</span><span style=color:#bf616a>sops
+</span><span>      ];
+</span><span>    };
+</span><span>  };
+</span><span>}
+</span></code></pre><hr><h2 id=key-generate-your-personal-age-key>🔑 Generate Your Personal <code>age</code> Key</h2><blockquote><p>The official docs recommend GPG, but I personally prefer using the pure <code>age</code> format. The local key is randomly generated, while the server key is usually derived via <code>ssh-to-age</code>.</blockquote><pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix-shell -p</span><span> rage</span><span style=color:#bf616a> --run </span><span>"</span><span style=color:#a3be8c>rage-keygen -o ~/.config/sops/age/keys.txt</span><span>"
+</span></code></pre><p>Generated <code>keys.txt</code> looks like this:<pre class=language-text data-lang=text style=color:#c0c5ce;background-color:#2b303b><code class=language-text data-lang=text><span># created: 2024-12-17T19:16:19+08:00
+</span><span># public key: age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span>AGE-SECRET-KEY-16KVMY0VXWDSECKQTR23AZYU874SM0HSMV6EPZZATG9UCXU6A233SVKDHPD
+</span></code></pre><ul><li>⚠️ <strong>Keep this file safe!</strong><li><code>AGE-SECRET-KEY-xxxx</code> → your private key<li><code>public key</code> → your public key</ul><hr><h2 id=desktop-generate-an-age-key-for-the-nixos-server-optional>🖥️ Generate an <code>age</code> Key for the NixOS Server (optional)</h2><p>If your NixOS configuration repository includes multiple hosts (e.g., managed via flakes), it’s best to <strong>generate a separate public key for each host</strong>.<p>You can derive it from the server’s SSH host key:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>ssh</span><span> root@&LTserver-ip>
+</span><span style=color:#bf616a>nix-shell -p</span><span> ssh-to-age</span><span style=color:#bf616a> --run </span><span>'</span><span style=color:#a3be8c>cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age</span><span>'
+</span></code></pre><p>This will return something like:<pre style=color:#c0c5ce;background-color:#2b303b><code><span>age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+</span></code></pre><hr><h2 id=gear-add-a-sops-yaml-configuration-file>⚙️ Add a <code>.sops.yaml</code> Configuration File</h2><p>At the root of your NixOS configuration repository, create a file named <code>.sops.yaml</code>:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#65737e># .sops.yaml
+</span><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_bob </span><span style=color:#a3be8c>age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+</span><span>
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>secrets/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>    - </span><span style=color:#bf616a>age</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_bob
+</span></code></pre><p>🗝️ Explanation:<ul><li><p><code>keys</code>: stores public keys of devices/users</p> <ul><li><code>&&LTname></code> defines an alias<li>I usually name local keys as <code>admin_...</code> and server keys as <code>server_...</code></ul><li><p><code>creation_rules</code>: defines encryption rules</p> <ul><li><code>path_regex</code> uses regex to match which files to encrypt<li><code>key_groups.age</code> defines which keys can decrypt the file</ul></ul><p>So in the example above, files under <code>secrets/</code> can be encrypted/decrypted using either <code>admin_alice</code> (local key) or <code>server_bob</code> (server key).<blockquote><p>💡 Defining keys doesn’t encrypt anything yet — encryption only happens when you run the <code>sops</code> command.</blockquote><p>If a file doesn’t match the rules, it can’t be encrypted.<p>In practice:<ul><li>The <strong>local public key</strong> allows you to decrypt files on your local machine.<li>The <strong>server public key</strong> allows the server to decrypt them after deployment.</ul><p>If you only include the local key, the server won’t be able to decrypt. If you only include the server key, you’ll need to bring its private key locally — which isn’t convenient.<p>You can compare this with the official example:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>2504791468b153b8a3963cc97ba53d1919c5dfd4
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_bob </span><span style=color:#a3be8c>age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_azmidi </span><span style=color:#a3be8c>0fd60c8c3b664aceb1796ce02b318df330331003
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_nosaxa </span><span style=color:#a3be8c>age1rgffpespcyjn0d8jglk7km9kfrfhdyev6camd3rck6pn8y47ze4sug23v3
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>secrets/[^/]+\.(yaml|json|env|ini)$
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>    - </span><span style=color:#bf616a>pgp</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_azmidi
+</span><span>      </span><span style=color:#bf616a>age</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_bob
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_nosaxa
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>secrets/azmidi/[^/]+\.(yaml|json|env|ini)$
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>    - </span><span style=color:#bf616a>pgp</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_azmidi
+</span><span>      </span><span style=color:#bf616a>age</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_bob
+</span></code></pre><p>The first rule allows both local and server PGP + age keys to encrypt top-level files in <code>secrets/</code> with extensions <code>.yaml|.json|.env|.ini</code>. The second rule applies similar logic for files inside <code>secrets/azmidi/</code>.<p>If this looks too complex, just use <code>secrets/.*</code> for simplicity. You can refine it later.<hr><h2 id=magic-wand-create-your-first-encrypted-file>🪄 Create Your First Encrypted File</h2><p>Let’s use the simpler <code>.sops.yaml</code> rule:<pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_bob </span><span style=color:#a3be8c>age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>secrets/*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>    - </span><span style=color:#bf616a>age</span><span>:
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>      - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_bob
+</span></code></pre><p>Now, create an encrypted file:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix-shell -p</span><span> sops</span><span style=color:#bf616a> --run </span><span>"</span><span style=color:#a3be8c>sops secrets/your-first-secrets</span><span>"
+</span></code></pre><p>If your default editor (<code>$EDITOR</code>) isn’t set, you can define it temporarily:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>EDITOR</span><span>=</span><span style=color:#a3be8c>nano </span><span style=color:#bf616a>nix-shell -p</span><span> sops</span><span style=color:#bf616a> --run </span><span>"</span><span style=color:#a3be8c>sops secrets/your-first-secrets</span><span>"
+</span></code></pre><p>Then delete the default text and add your secret:<pre style=color:#c0c5ce;background-color:#2b303b><code><span>WAKAPI_PASSWORD_SALT=adgjajnnaghauhlaksfjdk
+</span></code></pre><p>Save and exit. You’ll now have an encrypted file like this:<pre class=language-json data-lang=json style=color:#c0c5ce;background-color:#2b303b><code class=language-json data-lang=json><span>{
+</span><span>	"</span><span style=color:#a3be8c>data</span><span>": "</span><span style=color:#a3be8c>ENC[AES256_GCM,data:N/5R/bObiFfARZ5ud2zPiWqF9FhssA8=,iv:yZnocnSwlrz/EkGNdbw88VqsbzhXb/2V9ffwc8TLma0=,tag:nYsq2aAxMKpsBSEutvngRw==,type:str]</span><span>",
+</span><span>	"</span><span style=color:#a3be8c>sops</span><span>": {
+</span><span>		"</span><span style=color:#a3be8c>age</span><span>": [
+</span><span>			{
+</span><span>				"</span><span style=color:#a3be8c>recipient</span><span>": "</span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q</span><span>",
+</span><span>				"</span><span style=color:#a3be8c>enc</span><span>": "</span><span style=color:#a3be8c>-----BEGIN AGE ENCRYPTED FILE-----</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzNUU2T2tLcjMxQWV5UzFj</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>Rm9CbnV3K25UMktGaFB4aHoxSlBkREx2bzAwCnZybVV6aHJFalBkY3hZbDFKdndl</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>T0FFMEZBMnN4ZTBlbGJ0ZzFGSHJEV1kKLS0tIEg5VnAwZ1VWS3MvcUw3SEFKOG81</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>bXhRb3JmNGt0UVIzT1l4QXUrY0d6NzQK+Hjrzb68ZoWqfd4nKpJ2V4MOL1v66R8q</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>xqfLgGUY3+K5CZ9sNGtsuOo3U8emsrzB8daMw8GZALVU17s2ehfbfA==</span><span style=color:#96b5b4>\n</span><span style=color:#a3be8c>-----END AGE ENCRYPTED FILE-----</span><span style=color:#96b5b4>\n</span><span>"
+</span><span>			}
+</span><span>		],
+</span><span>		"</span><span style=color:#a3be8c>lastmodified</span><span>": "</span><span style=color:#a3be8c>2024-11-17T11:03:35Z</span><span>",
+</span><span>		"</span><span style=color:#a3be8c>mac</span><span>": "</span><span style=color:#a3be8c>ENC[AES256_GCM,data:jjRRXb9XorhcvHHdJGOTfOAHm/xm/GadoF9i28KEc6YfVhEN41CcrqGmHsfq6hqpPzNlrXa6Miu9/Ppbx/hPgD4joc3/q7llVgRZ7zeJOHdbHs9WLjWN82YoM8uPpN9C2nGVWVO+pOcnMGNw/32loyxK0JClv22rBXCjmcuenyw=,iv:0xX9iqJHJPIasBkhdbBxfdEz5OX01njIobcWgAZT89A=,tag:n47PA0iDPkykRrhKRRiV1g==,type:str]</span><span>",
+</span><span>		"</span><span style=color:#a3be8c>version</span><span>": "</span><span style=color:#a3be8c>3.11.0</span><span>"
+</span><span>	}
+</span><span>}
+</span></code></pre><p>Each <code>recipient</code> corresponds to one key that can decrypt this file. 💡 Only users/machines holding those private keys can decrypt it.<hr><h2 id=pencil2-modify-an-existing-secret>✏️ Modify an Existing Secret</h2><p>Simply run again:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>nix-shell -p</span><span> sops</span><span style=color:#bf616a> --run </span><span>"</span><span style=color:#a3be8c>sops secrets/your-first-secrets</span><span>"
+</span></code></pre><hr><h2 id=brain-use-the-secret-in-nixos>🧠 Use the Secret in NixOS</h2><p>Example using <a href=https://mynixos.com/nixpkgs/options/services.wakapi>Wakapi</a>:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#8fa1b3>{</span><span>config, ...</span><span style=color:#8fa1b3>}</span><span>:{
+</span><span>  </span><span style=color:#d08770>sops</span><span>.</span><span style=color:#d08770>secrets</span><span>.</span><span style=color:#d08770>secret-name </span><span>= {
+</span><span>    </span><span style=color:#d08770>mode </span><span>= "</span><span style=color:#a3be8c>0400</span><span>";
+</span><span>    </span><span style=color:#d08770>owner </span><span>= "</span><span style=color:#a3be8c>wakapi</span><span>";
+</span><span>    </span><span style=color:#d08770>group </span><span>= "</span><span style=color:#a3be8c>wakapi</span><span>";
+</span><span>    </span><span style=color:#d08770>format </span><span>= "</span><span style=color:#a3be8c>binary</span><span>";
+</span><span>    </span><span style=color:#d08770>sopsFile </span><span>= </span><span style=color:#a3be8c>../../../secrets/your-first-secrets</span><span>;
+</span><span>  };
+</span><span>  </span><span style=color:#d08770>services </span><span>= {
+</span><span>    </span><span style=color:#d08770>wakapi </span><span>= {
+</span><span>      </span><span style=color:#d08770>enable </span><span>= </span><span style=color:#d08770>true</span><span>;
+</span><span>      </span><span style=color:#d08770>passwordSaltFile </span><span>= </span><span style=color:#bf616a>config</span><span>.</span><span style=color:#bf616a>sops</span><span>.</span><span style=color:#bf616a>secrets</span><span>.</span><span style=color:#bf616a>secret-name</span><span>.</span><span style=color:#bf616a>path</span><span>;
+</span><span>    };
+</span><span>  };
+</span><span>}
+</span></code></pre><h3 id=explanation>Explanation</h3><ul><li><p><code>secret-name</code> → arbitrary name</p><li><p><code>mode</code> → permission of decrypted file</p><li><p><code>owner</code>, <code>group</code> → file owner/group (default: root)</p><li><p><code>format</code> → file format (<code>YAML</code>, <code>JSON</code>, <code>INI</code>, <code>dotenv</code>, <code>binary</code>)</p> <ul><li><code>binary</code> works well for plain text and general secrets</ul><li><p><code>sopsFile</code> → relative path to encrypted source file</p></ul><p>Then, reference it as:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#bf616a>passwordSaltFile </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> </span><span style=color:#bf616a>config</span><span>.</span><span style=color:#bf616a>sops</span><span>.</span><span style=color:#bf616a>secrets</span><span>.</span><span style=color:#bf616a>secret-name</span><span>.</span><span style=color:#bf616a>path</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><p>✅ After deployment, verify via:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>sudo</span><span> cat /run/secrets/secret-name
+</span></code></pre><hr><h2 id=crown-encrypting-root-password-hash>👑 Encrypting Root Password Hash</h2><p>This one is a bit special. A working example:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#8fa1b3>{</span><span>config, ...</span><span style=color:#8fa1b3>}</span><span>: {
+</span><span>  </span><span style=color:#d08770>sops</span><span>.</span><span style=color:#d08770>secrets</span><span>.</span><span style=color:#d08770>root-hashedPassword </span><span>= {
+</span><span>    </span><span style=color:#d08770>format </span><span>= "</span><span style=color:#a3be8c>binary</span><span>";
+</span><span>    </span><span style=color:#d08770>sopsFile </span><span>= </span><span style=color:#a3be8c>path/to/hashedPassword</span><span>;
+</span><span>    </span><span style=color:#d08770>neededForUsers </span><span>= </span><span style=color:#d08770>true</span><span>;
+</span><span>  };
+</span><span>  </span><span style=color:#d08770>users </span><span>= {
+</span><span>    </span><span style=color:#d08770>mutableUsers </span><span>= </span><span style=color:#d08770>false</span><span>;
+</span><span>    </span><span style=color:#d08770>users</span><span>.</span><span style=color:#d08770>root </span><span>= {
+</span><span>      </span><span style=color:#d08770>hashedPasswordFile </span><span>= </span><span style=color:#bf616a>config</span><span>.</span><span style=color:#bf616a>sops</span><span>.</span><span style=color:#bf616a>secrets</span><span>.</span><span style=color:#bf616a>root-hashedPassword</span><span>.</span><span style=color:#bf616a>path</span><span>;
+</span><span>      </span><span style=color:#d08770>openssh</span><span>.</span><span style=color:#d08770>authorizedKeys</span><span>.</span><span style=color:#d08770>keys </span><span>= [
+</span><span>        "</span><span style=color:#a3be8c>ssh-ed25519 AAAAC3Nz...</span><span>"
+</span><span>      ];
+</span><span>    };
+</span><span>  };
+</span><span>}
+</span></code></pre><hr><h2 id=dividers-example-personal-project-structure>🗂️ Example Personal Project Structure</h2><p>Example structure for multi-host management:<pre style=color:#c0c5ce;background-color:#2b303b><code><span>nix-config
+</span><span>├── .sops.yaml
+</span><span>├── flake.lock
+</span><span>├── flake.nix
+</span><span>├── Justfile
+</span><span>├── machines
+</span><span>│   ├── homelab1
+</span><span>│   │   ├── default.nix
+</span><span>│   │   ├── disko.nix
+</span><span>│   │   ├── hardware.nix
+</span><span>│   │   ├── modules
+</span><span>│   │   │   ├── powersave.nix
+</span><span>│   │   │   └── wakapi.nix
+</span><span>│   │   ├── secrets
+</span><span>│   │   │   ├── wakapi-passwd-salt
+</span><span>│   │   │   └── hashedPassword
+</span><span>│   │   └── user.nix
+</span><span>│   └── homelab2
+</span><span>│       ├── default.nix
+</span><span>│       ├── disko.nix
+</span><span>│       ├── hardware.nix
+</span><span>│       ├── modules
+</span><span>│       │   ├── powersave.nix
+</span><span>│       │   └── wakapi.nix
+</span><span>│       ├── secrets
+</span><span>│       │   ├── wakapi-passwd-salt
+</span><span>│       │   └── hashedPassword
+</span><span>│       └── user.nix
+</span><span>├── modules
+</span><span>│   ├── options
+</span><span>│   ├── services
+</span><span>│   └── system
+</span><span>└── README.md
+</span></code></pre><h3 id=example-sops-yaml>Example <code>.sops.yaml</code>:</h3><pre class=language-yaml data-lang=yaml style=color:#c0c5ce;background-color:#2b303b><code class=language-yaml data-lang=yaml><span style=color:#bf616a>keys</span><span>:
+</span><span>  - </span><span style=color:#b48ead>&</span><span>admin_alice </span><span style=color:#a3be8c>age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_homelab1 </span><span style=color:#a3be8c>age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+</span><span>  - </span><span style=color:#b48ead>&</span><span>server_homelab2 </span><span style=color:#a3be8c>age18jtffqax5v0t6ehh4ypaefl4mfhcrhn6ek3p80mhfp9psx6pd35qew2ww3
+</span><span style=color:#bf616a>creation_rules</span><span>:
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>machines/homelab1/secrets/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>      - </span><span style=color:#bf616a>age</span><span>:
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_homelab1
+</span><span>  - </span><span style=color:#bf616a>path_regex</span><span>: </span><span style=color:#a3be8c>machines/homelab2/secrets/.*
+</span><span>    </span><span style=color:#bf616a>key_groups</span><span>:
+</span><span>      - </span><span style=color:#bf616a>age</span><span>:
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>admin_alice
+</span><span>          - </span><span style=color:#b48ead>*</span><span style=color:#bf616a>server_homelab2
+</span></code></pre><p>Then add encrypted files:<pre class=language-bash data-lang=bash style=color:#c0c5ce;background-color:#2b303b><code class=language-bash data-lang=bash><span style=color:#bf616a>sops</span><span> machines/homelab1/secrets/hashedPassword
+</span><span style=color:#bf616a>sops</span><span> machines/homelab1/secrets/wakapi-passwd-salt
+</span><span style=color:#65737e># Other secrets...
+</span></code></pre><p>This way, within <code>machines/&LTmachine>/modules/</code>, you can reference secrets as:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span style=color:#bf616a>sopsFile </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> </span><span style=color:#a3be8c>../secrets/wakapi-passwd-salt</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><p>I also recommend prefixing secret names with the machine name, e.g.:<pre class=language-nix data-lang=nix style=color:#c0c5ce;background-color:#2b303b><code class=language-nix data-lang=nix><span>  </span><span style=color:#bf616a>sops</span><span>.</span><span style=color:#bf616a>secrets</span><span>.</span><span style=color:#bf616a>homelab1-wakapi-passwd-salt </span><span style=color:#2b303b;background-color:#bf616a>=</span><span> {
+</span><span>    </span><span style=color:#d08770>mode </span><span>= "</span><span style=color:#a3be8c>0400</span><span>";
+</span><span>    </span><span style=color:#d08770>owner </span><span>= "</span><span style=color:#a3be8c>wakapi</span><span>";
+</span><span>    </span><span style=color:#d08770>group </span><span>= "</span><span style=color:#a3be8c>wakapi</span><span>";
+</span><span>    </span><span style=color:#d08770>format </span><span>= "</span><span style=color:#a3be8c>binary</span><span>";
+</span><span>    </span><span style=color:#d08770>sopsFile </span><span>= </span><span style=color:#a3be8c>../secrets/wakapi-passwd-salt</span><span>;
+</span><span>  }</span><span style=color:#2b303b;background-color:#bf616a>;</span><span>
+</span></code></pre><hr><h2 id=white-check-mark-summary>✅ Summary</h2><p>By now, you should know how to:<ol><li>🧬 Generate <code>age</code> keys for personal and server use<li>🧾 Write a simple <code>.sops.yaml</code> configuration<li>🔐 Use <code>sops</code> to encrypt files<li>⚙️ Reference secrets securely in NixOS<li>👑 Encrypt root passwords and handle multi-host setups</ol><blockquote><p>From now on, your NixOS configuration repo can be <strong>safely pushed to GitHub</strong> — no more worries about secrets leakage. 🎉</blockquote></div></div><script type=module>import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({ theme: 'neutral',});</script>

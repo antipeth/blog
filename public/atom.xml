@@ -5,8 +5,668 @@
     <link rel="self" type="application/atom+xml" href="https://blog.0pt.icu/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://blog.0pt.icu"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2025-09-26T00:00:00+00:00</updated>
+    <updated>2025-10-17T00:00:00+00:00</updated>
     <id>https://blog.0pt.icu/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Sops-nix Quick Start Guide</title>
+        <published>2025-10-17T00:00:00+00:00</published>
+        <updated>2025-10-17T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              antipeth
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/"/>
+        <id>https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/</id>
+        
+        <content type="html" xml:base="https://blog.0pt.icu/posts/nixos-sops-nix-quick-start-guide/">&lt;h1 id=&quot;sops-nix-quick-start-guide&quot;&gt;Sops-nix Quick Start Guide&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;blue-book-introduction&quot;&gt;📘 Introduction&lt;&#x2F;h2&gt;
+&lt;p&gt;This article provides a simple guide to using &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Mic92&#x2F;sops-nix&quot;&gt;sops-nix&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;It’s written for those who “don’t fully understand the official documentation but still want to use sops-nix to encrypt secrets” (like me when I first started 😅).
+The goal is to use it in the simplest, most intuitive way. For advanced usage, please refer to the official documentation.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;⚠️ &lt;strong&gt;Note!!!&lt;&#x2F;strong&gt;
+&lt;code&gt;sops-nix&lt;&#x2F;code&gt; can only be used for &lt;strong&gt;file-level encryption&lt;&#x2F;strong&gt;, not for encrypting single values, strings, or booleans directly.
+In short, it is suitable for configuration options that &lt;strong&gt;expect a file path&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;For example:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;🔑 Wakapi’s &lt;a href=&quot;https:&#x2F;&#x2F;mynixos.com&#x2F;nixpkgs&#x2F;option&#x2F;services.wakapi.passwordSaltFile&quot;&gt;passwordSaltFile&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;🔒 Restic’s &lt;a href=&quot;https:&#x2F;&#x2F;mynixos.com&#x2F;nixpkgs&#x2F;option&#x2F;services.restic.backups.%3Cname%3E.environmentFile&quot;&gt;environmentFile&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;mynixos.com&#x2F;nixpkgs&#x2F;option&#x2F;services.restic.backups.%3Cname%3E.passwordFile&quot;&gt;passwordFile&lt;&#x2F;a&gt;, and &lt;a href=&quot;https:&#x2F;&#x2F;mynixos.com&#x2F;nixpkgs&#x2F;option&#x2F;services.restic.backups.%3Cname%3E.repositoryFile&quot;&gt;repositoryFile&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;During the system build, &lt;strong&gt;sops-nix uses Nix to pass encrypted files&lt;&#x2F;strong&gt;, and after boot, it automatically decrypts them into &lt;code&gt;&#x2F;run&#x2F;secrets&lt;&#x2F;code&gt; (a temporary directory) for services to read.
+It’s generally used for environment variables, passwords, and other sensitive data—making them safe to store in Git repositories while maintaining system security.&lt;&#x2F;p&gt;
+&lt;p&gt;💡 If you’re looking for a way to &lt;strong&gt;encrypt individual numbers, strings, booleans, or even inline Nix configurations&lt;&#x2F;strong&gt;, check out &lt;a href=&quot;https:&#x2F;&#x2F;blog.0pt.icu&#x2F;posts&#x2F;nixos-using-sops-to-encrypt-nix-values&#x2F;&quot;&gt;my other article&lt;&#x2F;a&gt; which introduces a clever method using sops.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;jigsaw-importing-the-sops-nix-module&quot;&gt;🧩 Importing the &lt;code&gt;sops-nix&lt;&#x2F;code&gt; Module&lt;&#x2F;h2&gt;
+&lt;p&gt;As shown in the official guide, you’ll need to add the &lt;code&gt;sops-nix&lt;&#x2F;code&gt; module to your flake configuration.
+Add it to &lt;code&gt;inputs&lt;&#x2F;code&gt;, and import it in &lt;code&gt;modules&lt;&#x2F;code&gt; as &lt;code&gt;sops-nix.nixosModules.sops&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sops-nix&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;url &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;github:Mic92&#x2F;sops-nix&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sops-nix&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;inputs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;follows &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;outputs &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{ &lt;&#x2F;span&gt;&lt;span&gt;self, nixpkgs, sops-nix &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;nixosConfigurations&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;yourhostname &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixpkgs&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;lib&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixosSystem &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;system &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;x86_64-linux&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;modules &lt;&#x2F;span&gt;&lt;span&gt;= [
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;.&#x2F;configuration.nix
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops-nix&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixosModules&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops
+&lt;&#x2F;span&gt;&lt;span&gt;      ];
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;key-generate-your-personal-age-key&quot;&gt;🔑 Generate Your Personal &lt;code&gt;age&lt;&#x2F;code&gt; Key&lt;&#x2F;h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The official docs recommend GPG, but I personally prefer using the pure &lt;code&gt;age&lt;&#x2F;code&gt; format.
+The local key is randomly generated, while the server key is usually derived via &lt;code&gt;ssh-to-age&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; rage&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --run &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rage-keygen -o ~&#x2F;.config&#x2F;sops&#x2F;age&#x2F;keys.txt&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Generated &lt;code&gt;keys.txt&lt;&#x2F;code&gt; looks like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;# created: 2024-12-17T19:16:19+08:00
+&lt;&#x2F;span&gt;&lt;span&gt;# public key: age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span&gt;AGE-SECRET-KEY-16KVMY0VXWDSECKQTR23AZYU874SM0HSMV6EPZZATG9UCXU6A233SVKDHPD
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ul&gt;
+&lt;li&gt;⚠️ &lt;strong&gt;Keep this file safe!&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;AGE-SECRET-KEY-xxxx&lt;&#x2F;code&gt; → your private key&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;public key&lt;&#x2F;code&gt; → your public key&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;desktop-generate-an-age-key-for-the-nixos-server-optional&quot;&gt;🖥️ Generate an &lt;code&gt;age&lt;&#x2F;code&gt; Key for the NixOS Server (optional)&lt;&#x2F;h2&gt;
+&lt;p&gt;If your NixOS configuration repository includes multiple hosts (e.g., managed via flakes), it’s best to &lt;strong&gt;generate a separate public key for each host&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;You can derive it from the server’s SSH host key:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ssh&lt;&#x2F;span&gt;&lt;span&gt; root@&amp;lt;server-ip&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; ssh-to-age&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --run &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cat &#x2F;etc&#x2F;ssh&#x2F;ssh_host_ed25519_key.pub | ssh-to-age&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This will return something like:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;gear-add-a-sops-yaml-configuration-file&quot;&gt;⚙️ Add a &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt; Configuration File&lt;&#x2F;h2&gt;
+&lt;p&gt;At the root of your NixOS configuration repository, create a file named &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# .sops.yaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_bob &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;secrets&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_bob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;🗝️ Explanation:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;keys&lt;&#x2F;code&gt;: stores public keys of devices&#x2F;users&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;amp;&amp;lt;name&amp;gt;&lt;&#x2F;code&gt; defines an alias&lt;&#x2F;li&gt;
+&lt;li&gt;I usually name local keys as &lt;code&gt;admin_...&lt;&#x2F;code&gt; and server keys as &lt;code&gt;server_...&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;creation_rules&lt;&#x2F;code&gt;: defines encryption rules&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;path_regex&lt;&#x2F;code&gt; uses regex to match which files to encrypt&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;key_groups.age&lt;&#x2F;code&gt; defines which keys can decrypt the file&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;So in the example above, files under &lt;code&gt;secrets&#x2F;&lt;&#x2F;code&gt; can be encrypted&#x2F;decrypted using either &lt;code&gt;admin_alice&lt;&#x2F;code&gt; (local key) or &lt;code&gt;server_bob&lt;&#x2F;code&gt; (server key).&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;💡 Defining keys doesn’t encrypt anything yet — encryption only happens when you run the &lt;code&gt;sops&lt;&#x2F;code&gt; command.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;If a file doesn’t match the rules, it can’t be encrypted.&lt;&#x2F;p&gt;
+&lt;p&gt;In practice:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;strong&gt;local public key&lt;&#x2F;strong&gt; allows you to decrypt files on your local machine.&lt;&#x2F;li&gt;
+&lt;li&gt;The &lt;strong&gt;server public key&lt;&#x2F;strong&gt; allows the server to decrypt them after deployment.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;If you only include the local key, the server won’t be able to decrypt.
+If you only include the server key, you’ll need to bring its private key locally — which isn’t convenient.&lt;&#x2F;p&gt;
+&lt;p&gt;You can compare this with the official example:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;2504791468b153b8a3963cc97ba53d1919c5dfd4
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_bob &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_azmidi &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;0fd60c8c3b664aceb1796ce02b318df330331003
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_nosaxa &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age1rgffpespcyjn0d8jglk7km9kfrfhdyev6camd3rck6pn8y47ze4sug23v3
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;secrets&#x2F;[^&#x2F;]+\.(yaml|json|env|ini)$
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pgp&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_azmidi
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_bob
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_nosaxa
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;secrets&#x2F;azmidi&#x2F;[^&#x2F;]+\.(yaml|json|env|ini)$
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pgp&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_azmidi
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_bob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The first rule allows both local and server PGP + age keys to encrypt top-level files in &lt;code&gt;secrets&#x2F;&lt;&#x2F;code&gt; with extensions &lt;code&gt;.yaml|.json|.env|.ini&lt;&#x2F;code&gt;.
+The second rule applies similar logic for files inside &lt;code&gt;secrets&#x2F;azmidi&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If this looks too complex, just use &lt;code&gt;secrets&#x2F;.*&lt;&#x2F;code&gt; for simplicity. You can refine it later.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;magic-wand-create-your-first-encrypted-file&quot;&gt;🪄 Create Your First Encrypted File&lt;&#x2F;h2&gt;
+&lt;p&gt;Let’s use the simpler &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt; rule:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_bob &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age1l64vm6knlk0ewgdnvxdwrzuhfjcakwpj533gw8lgays706q59d0quuys52
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;secrets&#x2F;*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;    - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_bob
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now, create an encrypted file:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; sops&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --run &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sops secrets&#x2F;your-first-secrets&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If your default editor (&lt;code&gt;$EDITOR&lt;&#x2F;code&gt;) isn’t set, you can define it temporarily:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;EDITOR&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;nano &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; sops&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --run &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sops secrets&#x2F;your-first-secrets&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then delete the default text and add your secret:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;WAKAPI_PASSWORD_SALT=adgjajnnaghauhlaksfjdk
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Save and exit. You’ll now have an encrypted file like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;json&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-json &quot;&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ENC[AES256_GCM,data:N&#x2F;5R&#x2F;bObiFfARZ5ud2zPiWqF9FhssA8=,iv:yZnocnSwlrz&#x2F;EkGNdbw88VqsbzhXb&#x2F;2V9ffwc8TLma0=,tag:nYsq2aAxMKpsBSEutvngRw==,type:str]&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;	&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: {
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: [
+&lt;&#x2F;span&gt;&lt;span&gt;			{
+&lt;&#x2F;span&gt;&lt;span&gt;				&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;recipient&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;				&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;enc&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-----BEGIN AGE ENCRYPTED FILE-----&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBzNUU2T2tLcjMxQWV5UzFj&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Rm9CbnV3K25UMktGaFB4aHoxSlBkREx2bzAwCnZybVV6aHJFalBkY3hZbDFKdndl&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;T0FFMEZBMnN4ZTBlbGJ0ZzFGSHJEV1kKLS0tIEg5VnAwZ1VWS3MvcUw3SEFKOG81&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;bXhRb3JmNGt0UVIzT1l4QXUrY0d6NzQK+Hjrzb68ZoWqfd4nKpJ2V4MOL1v66R8q&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;xqfLgGUY3+K5CZ9sNGtsuOo3U8emsrzB8daMw8GZALVU17s2ehfbfA==&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;-----END AGE ENCRYPTED FILE-----&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;			}
+&lt;&#x2F;span&gt;&lt;span&gt;		],
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;lastmodified&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;2024-11-17T11:03:35Z&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;mac&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ENC[AES256_GCM,data:jjRRXb9XorhcvHHdJGOTfOAHm&#x2F;xm&#x2F;GadoF9i28KEc6YfVhEN41CcrqGmHsfq6hqpPzNlrXa6Miu9&#x2F;Ppbx&#x2F;hPgD4joc3&#x2F;q7llVgRZ7zeJOHdbHs9WLjWN82YoM8uPpN9C2nGVWVO+pOcnMGNw&#x2F;32loyxK0JClv22rBXCjmcuenyw=,iv:0xX9iqJHJPIasBkhdbBxfdEz5OX01njIobcWgAZT89A=,tag:n47PA0iDPkykRrhKRRiV1g==,type:str]&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;		&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;version&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;: &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;3.11.0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;	}
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Each &lt;code&gt;recipient&lt;&#x2F;code&gt; corresponds to one key that can decrypt this file.
+💡 Only users&#x2F;machines holding those private keys can decrypt it.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;pencil2-modify-an-existing-secret&quot;&gt;✏️ Modify an Existing Secret&lt;&#x2F;h2&gt;
+&lt;p&gt;Simply run again:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; sops&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --run &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sops secrets&#x2F;your-first-secrets&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;brain-use-the-secret-in-nixos&quot;&gt;🧠 Use the Secret in NixOS&lt;&#x2F;h2&gt;
+&lt;p&gt;Example using &lt;a href=&quot;https:&#x2F;&#x2F;mynixos.com&#x2F;nixpkgs&#x2F;options&#x2F;services.wakapi&quot;&gt;Wakapi&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;config, ...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;:{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;secret-name &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;mode &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;0400&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;owner &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;wakapi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;group &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;wakapi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;format &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;binary&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sopsFile &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;..&#x2F;..&#x2F;..&#x2F;secrets&#x2F;your-first-secrets&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;services &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;wakapi &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;enable &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;passwordSaltFile &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secret-name&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;explanation&quot;&gt;Explanation&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;secret-name&lt;&#x2F;code&gt; → arbitrary name&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;mode&lt;&#x2F;code&gt; → permission of decrypted file&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;owner&lt;&#x2F;code&gt;, &lt;code&gt;group&lt;&#x2F;code&gt; → file owner&#x2F;group (default: root)&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;format&lt;&#x2F;code&gt; → file format (&lt;code&gt;YAML&lt;&#x2F;code&gt;, &lt;code&gt;JSON&lt;&#x2F;code&gt;, &lt;code&gt;INI&lt;&#x2F;code&gt;, &lt;code&gt;dotenv&lt;&#x2F;code&gt;, &lt;code&gt;binary&lt;&#x2F;code&gt;)&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;binary&lt;&#x2F;code&gt; works well for plain text and general secrets&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;sopsFile&lt;&#x2F;code&gt; → relative path to encrypted source file&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Then, reference it as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;passwordSaltFile &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secret-name&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;✅ After deployment, verify via:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span&gt; cat &#x2F;run&#x2F;secrets&#x2F;secret-name
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;crown-encrypting-root-password-hash&quot;&gt;👑 Encrypting Root Password Hash&lt;&#x2F;h2&gt;
+&lt;p&gt;This one is a bit special. A working example:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;config, ...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;: {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;root-hashedPassword &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;format &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;binary&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sopsFile &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&#x2F;to&#x2F;hashedPassword&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;neededForUsers &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;users &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;mutableUsers &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;users&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;root &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;hashedPasswordFile &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;root-hashedPassword&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;openssh&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;authorizedKeys&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;keys &lt;&#x2F;span&gt;&lt;span&gt;= [
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ssh-ed25519 AAAAC3Nz...&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;      ];
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;dividers-example-personal-project-structure&quot;&gt;🗂️ Example Personal Project Structure&lt;&#x2F;h2&gt;
+&lt;p&gt;Example structure for multi-host management:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;nix-config
+&lt;&#x2F;span&gt;&lt;span&gt;├── .sops.yaml
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.lock
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── Justfile
+&lt;&#x2F;span&gt;&lt;span&gt;├── machines
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── homelab1
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── default.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── disko.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── hardware.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   ├── powersave.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   └── wakapi.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── secrets
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   ├── wakapi-passwd-salt
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   └── hashedPassword
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   └── user.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── homelab2
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── default.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── disko.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── hardware.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   ├── powersave.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   └── wakapi.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── secrets
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   ├── wakapi-passwd-salt
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   └── hashedPassword
+&lt;&#x2F;span&gt;&lt;span&gt;│       └── user.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── options
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── services
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── system
+&lt;&#x2F;span&gt;&lt;span&gt;└── README.md
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;example-sops-yaml&quot;&gt;Example &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt;:&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_homelab1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age12zlz6lvcdk6eqaewfylg35w0syh58sm7gh53q5vvn7hd7c6nngyseftjxl
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;server_homelab2 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age18jtffqax5v0t6ehh4ypaefl4mfhcrhn6ek3p80mhfp9psx6pd35qew2ww3
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;machines&#x2F;homelab1&#x2F;secrets&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_homelab1
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;machines&#x2F;homelab2&#x2F;secrets&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;server_homelab2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then add encrypted files:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt; machines&#x2F;homelab1&#x2F;secrets&#x2F;hashedPassword
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt; machines&#x2F;homelab1&#x2F;secrets&#x2F;wakapi-passwd-salt
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Other secrets...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This way, within &lt;code&gt;machines&#x2F;&amp;lt;machine&amp;gt;&#x2F;modules&#x2F;&lt;&#x2F;code&gt;, you can reference secrets as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sopsFile &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;..&#x2F;secrets&#x2F;wakapi-passwd-salt&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I also recommend prefixing secret names with the machine name, e.g.:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sops&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;secrets&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;homelab1-wakapi-passwd-salt &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;mode &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;0400&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;owner &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;wakapi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;group &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;wakapi&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;format &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;binary&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;sopsFile &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;..&#x2F;secrets&#x2F;wakapi-passwd-salt&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;white-check-mark-summary&quot;&gt;✅ Summary&lt;&#x2F;h2&gt;
+&lt;p&gt;By now, you should know how to:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;🧬 Generate &lt;code&gt;age&lt;&#x2F;code&gt; keys for personal and server use&lt;&#x2F;li&gt;
+&lt;li&gt;🧾 Write a simple &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt; configuration&lt;&#x2F;li&gt;
+&lt;li&gt;🔐 Use &lt;code&gt;sops&lt;&#x2F;code&gt; to encrypt files&lt;&#x2F;li&gt;
+&lt;li&gt;⚙️ Reference secrets securely in NixOS&lt;&#x2F;li&gt;
+&lt;li&gt;👑 Encrypt root passwords and handle multi-host setups&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;From now on, your NixOS configuration repo can be &lt;strong&gt;safely pushed to GitHub&lt;&#x2F;strong&gt; —
+no more worries about secrets leakage. 🎉&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Using SOPS to Encrypt Nix Values</title>
+        <published>2025-10-17T00:00:00+00:00</published>
+        <updated>2025-10-17T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              antipeth
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/"/>
+        <id>https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/</id>
+        
+        <content type="html" xml:base="https://blog.0pt.icu/posts/nixos-using-sops-to-encrypt-nix-values/">&lt;h1 id=&quot;using-sops-to-encrypt-nix-values&quot;&gt;Using SOPS to Encrypt Nix Values&lt;&#x2F;h1&gt;
+&lt;h2 id=&quot;jigsaw-introduction&quot;&gt;🧩 Introduction&lt;&#x2F;h2&gt;
+&lt;p&gt;In some NixOS configurations, we may need to store sensitive information, such as:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;VPS IPv4 &#x2F; IPv6 addresses;&lt;&#x2F;li&gt;
+&lt;li&gt;Certain private configuration values;&lt;&#x2F;li&gt;
+&lt;li&gt;Or internal parameters that should not be exposed publicly.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;After studying &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Mic92&#x2F;sops-nix&quot;&gt;sops-nix&lt;&#x2F;a&gt;, I realized that &lt;strong&gt;sops-nix only supports file-level encryption&lt;&#x2F;strong&gt; — it cannot encrypt individual Nix values.&lt;&#x2F;p&gt;
+&lt;p&gt;These values are often needed &lt;strong&gt;during the system build phase&lt;&#x2F;strong&gt;, but &lt;code&gt;sops-nix&lt;&#x2F;code&gt; decrypts only &lt;strong&gt;after the system has booted&lt;&#x2F;strong&gt;, meaning that during the build phase, the encrypted files remain ciphertext.&lt;&#x2F;p&gt;
+&lt;p&gt;This means that sensitive values still &lt;strong&gt;appear in plaintext in &lt;code&gt;&#x2F;nix&#x2F;store&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;. While files encrypted by &lt;code&gt;sops-nix&lt;&#x2F;code&gt; remain protected at that stage, any Nix expression containing secrets will be fully visible.&lt;&#x2F;p&gt;
+&lt;p&gt;So, from a security standpoint, 👉 &lt;strong&gt;the following approach is merely a workaround&lt;&#x2F;strong&gt;.
+If &lt;code&gt;sops-nix&lt;&#x2F;code&gt; can be used, it’s always preferable — as it’s more secure by design.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;concept&quot;&gt;Concept&lt;&#x2F;h2&gt;
+&lt;p&gt;This approach was originally suggested by &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;yonzilch&quot;&gt;@yonzilch&lt;&#x2F;a&gt; — much appreciated 🙏.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;strong&gt;core idea&lt;&#x2F;strong&gt; is:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Store sensitive values as individual &lt;code&gt;.nix&lt;&#x2F;code&gt; files, then encrypt those files using &lt;code&gt;sops&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h3 id=&quot;example-define-an-ssh-port&quot;&gt;✳️ Example: Define an SSH Port&lt;&#x2F;h3&gt;
+&lt;p&gt;Create a file named &lt;code&gt;forgejo-ssh-port.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;223
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then reference it inside &lt;code&gt;forgejo.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;services&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;forgejo &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;settings &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;server &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;SSH_PORT &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&#x2F;to&#x2F;forgejo-ssh-port.nix&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h3 id=&quot;example-define-a-url&quot;&gt;✳️ Example: Define a URL&lt;&#x2F;h3&gt;
+&lt;p&gt;Create &lt;code&gt;headscale-server-url.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;https:&#x2F;&#x2F;headscale.example.com&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then reference it in &lt;code&gt;headscale.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;services &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;headscale &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;settings &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;server_url &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&#x2F;to&#x2F;headscale-server-url.nix&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h3 id=&quot;example-define-a-complex-structure&quot;&gt;✳️ Example: Define a Complex Structure&lt;&#x2F;h3&gt;
+&lt;p&gt;Create &lt;code&gt;headscale-dns-settings.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;nameservers&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;global &lt;&#x2F;span&gt;&lt;span&gt;= [
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;127.0.0.1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;    &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;::1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  ];
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;magic_dns &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;base_domain &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;test&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then reference it in &lt;code&gt;headscale.nix&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;services &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;headscale &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;settings &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;dns &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;path&#x2F;to&#x2F;headscale-dns-settings.nix&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;  };
+&lt;&#x2F;span&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#2b303b;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;📘 &lt;strong&gt;To summarize:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Any Nix value — string, number, list, or attribute set — can exist as a separate &lt;code&gt;.nix&lt;&#x2F;code&gt; file;&lt;&#x2F;li&gt;
+&lt;li&gt;Decrypt before deployment, re-encrypt afterward;&lt;&#x2F;li&gt;
+&lt;li&gt;Use &lt;code&gt;sops&lt;&#x2F;code&gt; for all encryption&#x2F;decryption operations;&lt;&#x2F;li&gt;
+&lt;li&gt;Encrypted files can be safely committed to your Git repository.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;To simplify this process, you can automate encryption&#x2F;decryption and deployment with a script or a &lt;code&gt;just&lt;&#x2F;code&gt; recipe.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;gear-installing-sops&quot;&gt;⚙️ Installing sops&lt;&#x2F;h2&gt;
+&lt;p&gt;Install manually:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; sops
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;receipt-create-a-sops-yaml-configuration&quot;&gt;🧾 Create a &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt; Configuration&lt;&#x2F;h2&gt;
+&lt;p&gt;If you haven’t yet read my other article 👉 &lt;a href=&quot;https:&#x2F;&#x2F;blog.0pt.icu&#x2F;posts&#x2F;nixos-sops-nix-quick-start-guide&#x2F;&quot;&gt;Quickstart Guide to sops-nix&lt;&#x2F;a&gt;,
+I highly recommend doing so first — it explains &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt; in detail.&lt;&#x2F;p&gt;
+&lt;p&gt;At your repository root, create &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;values&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This configuration specifies that:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;All files under the &lt;code&gt;values&#x2F;&lt;&#x2F;code&gt; directory can be encrypted&#x2F;decrypted by &lt;code&gt;sops&lt;&#x2F;code&gt;;&lt;&#x2F;li&gt;
+&lt;li&gt;The &lt;code&gt;admin_alice&lt;&#x2F;code&gt; key is used (only locally — you don’t need your server’s public key).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;memo-create-plaintext-nix-values&quot;&gt;📝 Create Plaintext Nix Values&lt;&#x2F;h2&gt;
+&lt;p&gt;Create plaintext sensitive value files under &lt;code&gt;values&#x2F;&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;forgejo-ssh-port.nix
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;headscale-server-url.nix
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;headscale-dns-settings.nix
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# ...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;lock-encrypt&quot;&gt;🔒 Encrypt&lt;&#x2F;h2&gt;
+&lt;p&gt;Run:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;* | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xargs -n&lt;&#x2F;span&gt;&lt;span&gt; 1 sops encrypt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;bricks-optional-commit-to-git&quot;&gt;🧱 (Optional) Commit to Git&lt;&#x2F;h2&gt;
+&lt;p&gt;Once confirmed, you can safely commit the encrypted files:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; add values&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; commit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -m &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;add some values&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;unlock-decrypt-before-deployment&quot;&gt;🔓 Decrypt Before Deployment&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;* | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xargs -n&lt;&#x2F;span&gt;&lt;span&gt; 1 sops decrypt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;rocket-deploy-the-system&quot;&gt;🚀 Deploy the System&lt;&#x2F;h2&gt;
+&lt;p&gt;Normal deployment command:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nixos-rebuild&lt;&#x2F;span&gt;&lt;span&gt; switch ...
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;closed-lock-with-key-re-encrypt-after-deployment&quot;&gt;🔐 Re-encrypt After Deployment&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;* | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xargs -n&lt;&#x2F;span&gt;&lt;span&gt; 1 sops encrypt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;floppy-disk-optional-commit-again&quot;&gt;💾 (Optional) Commit Again&lt;&#x2F;h2&gt;
+&lt;p&gt;If the values are correct:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; add values&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; commit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -m &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;add some values&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;tools-modify-or-add-plaintext-values&quot;&gt;🛠️ Modify or Add Plaintext Values&lt;&#x2F;h2&gt;
+&lt;p&gt;First, decrypt the encrypted files:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;* | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xargs -n&lt;&#x2F;span&gt;&lt;span&gt; 1 sops decrypt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Then edit or add new plaintext &lt;code&gt;.nix&lt;&#x2F;code&gt; files.
+Afterward, re-encrypt them:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ls&lt;&#x2F;span&gt;&lt;span&gt; values&#x2F;* | &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xargs -n&lt;&#x2F;span&gt;&lt;span&gt; 1 sops encrypt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;zap-automating-the-workflow-with-justfile&quot;&gt;⚡ Automating the Workflow with Justfile&lt;&#x2F;h2&gt;
+&lt;p&gt;You can easily wrap the above steps into scripts or automation tools.
+Here we’ll use &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;casey&#x2F;just&quot;&gt;just&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Install &lt;code&gt;just&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;nix-shell -p&lt;&#x2F;span&gt;&lt;span&gt; just
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;At your repo root, create a &lt;code&gt;justfile&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;justfile&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-justfile &quot;&gt;&lt;code class=&quot;language-justfile&quot; data-lang=&quot;justfile&quot;&gt;&lt;span&gt;set shell := [&amp;quot;bash&amp;quot;, &amp;quot;-c&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;encrypt:
+&lt;&#x2F;span&gt;&lt;span&gt;  ls values&#x2F;* | xargs -n 1 sops encrypt -i
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;decrypt:
+&lt;&#x2F;span&gt;&lt;span&gt;  ls values&#x2F;* | xargs -n 1 sops decrypt -i
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;deploy:
+&lt;&#x2F;span&gt;&lt;span&gt;  ls values&#x2F;* | xargs -n 1 sops decrypt -i ; git add . ; nixos-rebuild switch ... ; ls values&#x2F;* | xargs -n 1 sops encrypt -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Usage:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; encrypt  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Encrypt all
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; decrypt  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Decrypt all
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; deploy   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Auto decrypt + deploy + re-encrypt
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;warning-limitations&quot;&gt;⚠️ Limitations&lt;&#x2F;h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;🧩 &lt;strong&gt;Non-native solution&lt;&#x2F;strong&gt; — a workaround that requires extra manual steps;&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;🧠 &lt;strong&gt;Prone to mistakes&lt;&#x2F;strong&gt; — you might accidentally commit plaintext secrets to Git;&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;🔄 &lt;strong&gt;Frequent ciphertext changes&lt;&#x2F;strong&gt; — every time you re-encrypt, ciphertext differs, cluttering Git history.
+You can avoid this by discarding those diffs with:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; reset&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --hard&lt;&#x2F;span&gt;&lt;span&gt; HEAD&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span&gt;1
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;bricks-example-project-structure&quot;&gt;🧱 Example Project Structure&lt;&#x2F;h2&gt;
+&lt;p&gt;Here’s my personal layout for reference:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;nix-config
+&lt;&#x2F;span&gt;&lt;span&gt;├── .sops.yaml
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.lock
+&lt;&#x2F;span&gt;&lt;span&gt;├── flake.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── Justfile
+&lt;&#x2F;span&gt;&lt;span&gt;├── machines
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── homelab1
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── default.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── disko.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── hardware.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   ├── forgejo.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   └── headscale.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   ├── values
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   ├── forgejo-ssh-port.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   ├── headscale-dns-settings.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   │   └── headscale-server-url.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   │   └── user.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── homelab2
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── default.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── disko.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── hardware.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   ├── forgejo.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   └── headscale.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       ├── values
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   ├── forgejo-ssh-port.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   ├── headscale-dns-settings.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       │   └── headscale-server-url.nix
+&lt;&#x2F;span&gt;&lt;span&gt;│       └── user.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── modules
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── options
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── services
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── system
+&lt;&#x2F;span&gt;&lt;span&gt;└── README.md
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;My &lt;code&gt;.sops.yaml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;yaml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-yaml &quot;&gt;&lt;code class=&quot;language-yaml&quot; data-lang=&quot;yaml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;keys&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span&gt;admin_alice &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;age162j8mn60ty8dxk8cvww2lckteyeemdnd64trekpv35qcuw2pqcfqwtnm9q
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;creation_rules&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;machines&#x2F;homelab1&#x2F;values&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;path_regex&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;machines&#x2F;homelab2&#x2F;values&#x2F;.*
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;key_groups&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;      - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;age&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span&gt;          - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;admin_alice
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;My &lt;code&gt;justfile&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;justfile&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-justfile &quot;&gt;&lt;code class=&quot;language-justfile&quot; data-lang=&quot;justfile&quot;&gt;&lt;span&gt;# use bash for shell commands
+&lt;&#x2F;span&gt;&lt;span&gt;set shell := [&amp;quot;bash&amp;quot;, &amp;quot;-c&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;# Set hostname environment
+&lt;&#x2F;span&gt;&lt;span&gt;hostname := `hostname`
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;deploy input:
+&lt;&#x2F;span&gt;&lt;span&gt;  # Perform remote deploy action
+&lt;&#x2F;span&gt;&lt;span&gt;  ls machines&#x2F;{{input}}&#x2F;values&#x2F;* | xargs -n 1 sops decrypt -i ; sed -i &amp;quot;&#x2F;^\s*hostname[[:space:]]*=[[:space:]]*\&amp;quot;&#x2F;s&#x2F;\&amp;quot;\(.*\)\&amp;quot;&#x2F;\&amp;quot;{{input}}\&amp;quot;&#x2F;&amp;quot; .&#x2F;flake.nix ; git add . ; nixos-rebuild-ng switch --flake .#{{input}} --build-host root@{{input}} --target-host root@{{input}} -v ; ls machines&#x2F;{{input}}&#x2F;values&#x2F;* | xargs -n 1 sops encrypt -i
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;de input:
+&lt;&#x2F;span&gt;&lt;span&gt;  # Decrypt
+&lt;&#x2F;span&gt;&lt;span&gt;  ls machines&#x2F;{{input}}&#x2F;values&#x2F;* | xargs -n 1 sops decrypt -i
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;en input:
+&lt;&#x2F;span&gt;&lt;span&gt;  # Encrypt
+&lt;&#x2F;span&gt;&lt;span&gt;  ls machines&#x2F;{{input}}&#x2F;values&#x2F;* | xargs -n 1 sops encrypt -i
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;🧠 &lt;strong&gt;Key points:&lt;&#x2F;strong&gt;
+You need to customize the hostname field matching scheme in your own &lt;code&gt;flake.nix&lt;&#x2F;code&gt;.
+Use &lt;code&gt;sed&lt;&#x2F;code&gt; to dynamically replace the hostname in &lt;code&gt;flake.nix&lt;&#x2F;code&gt;, and use &lt;code&gt;{{input}}&lt;&#x2F;code&gt; to substitute the hostname in the &lt;code&gt;just&lt;&#x2F;code&gt; command:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;sed -i &amp;quot;&#x2F;^\s*hostname[[:space:]]*=[[:space:]]*\&amp;quot;&#x2F;s&#x2F;\&amp;quot;\(.*\)\&amp;quot;&#x2F;\&amp;quot;{{input}}\&amp;quot;&#x2F;&amp;quot; .&#x2F;flake.nix
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Examples:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; de homelab1     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Decrypt all encrypted nix values in machines&#x2F;homelab1&#x2F;values&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; en homelab1     &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Encrypt all nix values in machines&#x2F;homelab1&#x2F;values&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; deploy homelab1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;# Auto decrypt + replace hostname + deploy homelab1
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; de homelab2
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; en homelab2
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; deploy homelab2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;white-check-mark-conclusion&quot;&gt;✅ Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;With this approach, you can:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Use &lt;code&gt;sops&lt;&#x2F;code&gt; to encrypt any Nix value;&lt;&#x2F;li&gt;
+&lt;li&gt;Safely import sensitive data during the build phase;&lt;&#x2F;li&gt;
+&lt;li&gt;Automate encryption&#x2F;decryption and deployment with &lt;code&gt;just&lt;&#x2F;code&gt;;&lt;&#x2F;li&gt;
+&lt;li&gt;Keep your configuration repository tidy and secure.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;🧊 While this isn’t a perfect solution, it’s a &lt;strong&gt;practical and elegant compromise&lt;&#x2F;strong&gt; for cases where you need Nix-level secret handling.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>A770使用体验</title>
         <published>2025-09-26T00:00:00+00:00</published>
