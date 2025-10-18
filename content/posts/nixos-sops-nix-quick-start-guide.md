@@ -409,3 +409,5 @@ By now, you should know how to:
 
 > From now on, your NixOS configuration repo can be **safely pushed to GitHub** —
 > no more worries about secrets leakage. 🎉
+
+If you want to see more practical examples, please visit [my Nix configuration](https://github.com/antipeth/atplab).

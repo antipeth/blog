@@ -399,7 +399,7 @@ just deploy homelab2
 
 ---
 
-## ✅ Conclusion
+## ✅ Summary
 
 With this approach, you can:
 
@@ -409,3 +409,5 @@ With this approach, you can:
 * Keep your configuration repository tidy and secure.
 
 🧊 While this isn’t a perfect solution, it’s a **practical and elegant compromise** for cases where you need Nix-level secret handling.
+
+If you want to see more practical examples, please visit [my Nix configuration](https://github.com/antipeth/atplab).

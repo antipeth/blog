@@ -454,6 +454,7 @@ The second rule applies similar logic for files inside &lt;code&gt;secrets&#x2F;
 &lt;p&gt;From now on, your NixOS configuration repo can be &lt;strong&gt;safely pushed to GitHub&lt;&#x2F;strong&gt; —
 no more worries about secrets leakage. 🎉&lt;&#x2F;p&gt;
 &lt;&#x2F;blockquote&gt;
+&lt;p&gt;If you want to see more practical examples, please visit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;antipeth&#x2F;atplab&quot;&gt;my Nix configuration&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 </content>
         
     </entry>
@@ -755,7 +756,7 @@ Use &lt;code&gt;sed&lt;&#x2F;code&gt; to dynamically replace the hostname in &lt
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just&lt;&#x2F;span&gt;&lt;span&gt; deploy homelab2
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;hr &#x2F;&gt;
-&lt;h2 id=&quot;white-check-mark-conclusion&quot;&gt;✅ Conclusion&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;white-check-mark-summary&quot;&gt;✅ Summary&lt;&#x2F;h2&gt;
 &lt;p&gt;With this approach, you can:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;Use &lt;code&gt;sops&lt;&#x2F;code&gt; to encrypt any Nix value;&lt;&#x2F;li&gt;
@@ -764,6 +765,7 @@ Use &lt;code&gt;sed&lt;&#x2F;code&gt; to dynamically replace the hostname in &lt
 &lt;li&gt;Keep your configuration repository tidy and secure.&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;p&gt;🧊 While this isn’t a perfect solution, it’s a &lt;strong&gt;practical and elegant compromise&lt;&#x2F;strong&gt; for cases where you need Nix-level secret handling.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to see more practical examples, please visit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;antipeth&#x2F;atplab&quot;&gt;my Nix configuration&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 </content>
         
     </entry>
