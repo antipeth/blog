@@ -1,0 +1,30 @@
+# The URL the site will be built for
+theme = "cereal"
+author = "antipeth"
+base_url = "https://blog.0pt.icu"
+title = "世纪大道"
+description = "你在世纪大道东门"
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+minify_html = true
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = false
+
+generate_feeds = true
+
+[markdown]
+# Whether to do syntax highlighting
+# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
+highlight_code = true
+
+[extra]
+# Put all your custom variables here
+menu = [
+    { name = "/home", url = "/", weight = 1 },
+    { name = "/posts", url = "/posts", weight = 2 },
+    { name = "/links", url = "/links", weight = 3 },
+    { name = "/about", url = "/about", weight = 4 },
+]
+social = [{ name = "github", url = "https://github.com/antipeth", weight = 1 }]
+toc = true
