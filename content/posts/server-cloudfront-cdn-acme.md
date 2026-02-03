@@ -3,10 +3,6 @@ title = "cloudfront配置小鸡cdn并使用acme.sh自动获取证书"
 date = 2024-02-26
 +++
 
-# cloudfront配置小鸡cdn并使用acme.sh自动获取证书
-
-2024-02-26
-
 # 1.CloudFront配置
 
 先创建一个`分配` 。

@@ -3,10 +3,6 @@ title = "A770使用体验"
 date = 2025-09-26
 +++
 
-# A770使用体验
-
-2025-09-26
-
 ## 引
 
 8月底把游戏本出了装机，想搞一张能跑ai绘画顺便能打打游戏的显卡。
@@ -243,7 +239,7 @@ python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index
 `torch.xpu`可以代替`torch.cuda`，想测试xpu速度如何。
 [测试脚本来源](https://discuss.pytorch.org/t/timings-for-intel-arc-graphics-xpu-vs-nvidia-rtx-3000-gpu-on-a-laptop/218200)
 
-```benchmark.py
+```python
 import torch
 print (torch.__version__)
 

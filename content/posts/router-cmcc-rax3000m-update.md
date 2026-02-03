@@ -3,10 +3,6 @@ title = "升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2"
 date = 2025-07-23
 +++
 
-# 升级cmcc rax3000m emmc路由器,刷入ImmortWrt24.10.2
-
-2025-07-23
-
 ## 引
 
 去年偶得一个cmcc rax3000m emmc路由器，为`immortalwrt21`，使用[该固件](https://github.com/AngelaCooljx/Actions-rax3000m-emmc)，近来只觉十分陈旧，遂萌生刷写新固件之意。

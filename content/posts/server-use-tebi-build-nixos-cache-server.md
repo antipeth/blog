@@ -3,8 +3,6 @@ title = "使用tebi作为s3,搭建nix缓存服务器"
 date = 2024-11-12
 +++
 
-# 使用tebi作为s3,搭建nix缓存服务器
-2024-11-12
 参考
 1. https://nixos-and-flakes.thiscute.world/zh/nix-store/host-your-own-binary-cache-server
 

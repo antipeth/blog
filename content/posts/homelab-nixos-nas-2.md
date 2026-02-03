@@ -3,10 +3,6 @@ title = "My NixOS NAS🧊 (2)"
 date = 2025-10-17
 +++
 
-# My NixOS NAS🧊 (2)
-
-2025-10-17
-
 You can find [my configuration here](https://github.com/antipeth/atplab).
 You can find [my previous article here](https://blog.0pt.icu/posts/homelab-nixos-nas/).
 

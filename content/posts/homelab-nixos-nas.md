@@ -3,10 +3,6 @@ title = "My NixOS NAS🧊"
 date = 2025-03-04
 +++
 
-# Introducing My NixOS NAS🧊
-
-2025-03-04
-
 You can find my config [here](https://github.com/antipeth/my-clan)
 
 ## A Few Words Before

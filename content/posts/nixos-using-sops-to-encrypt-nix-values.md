@@ -3,10 +3,6 @@ title = "Using SOPS to Encrypt Nix Values"
 date = 2025-10-17
 +++
 
-# Using SOPS to Encrypt Nix Values
-
-2025-10-17
-
 ## 🧩 Introduction
 
 In some NixOS configurations, we may need to store sensitive information, such as:

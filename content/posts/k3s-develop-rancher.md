@@ -3,10 +3,6 @@ title = "k3s部署rancher"
 date = 2024-11-11
 +++
 
-# k3s部署rancher
-
-2024-11-11
-
 参考:
 
 1. https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/install-upgrade-on-a-kubernetes-cluster

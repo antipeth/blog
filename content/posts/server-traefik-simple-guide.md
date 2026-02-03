@@ -3,9 +3,6 @@ title = "Docker/NixOS使用traefik实现简单反代"
 date = 2024-12-20
 +++
 
-# Docker/NixOS使用traefik实现简单反代
-
-2024-12-20
 参考
 
 1. https://doc.traefik.io/traefik/

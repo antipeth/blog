@@ -3,10 +3,6 @@ title = "Sops-nix Quick Start Guide"
 date = 2025-10-17
 +++
 
-# Sops-nix Quick Start Guide
-
-2025-10-17
-
 ## 📘 Introduction
 
 This article provides a simple guide to using [sops-nix](https://github.com/Mic92/sops-nix).

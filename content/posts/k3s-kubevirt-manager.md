@@ -3,10 +3,6 @@ title = "k3s部署kubevirt-manager"
 date = 2024-11-08
 +++
 
-# k3s部署kubevirt-manager
-
-2024-11-08
-
 参考
 
 1. https://kubevirt.io/user-guide/
