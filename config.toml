@@ -8,15 +8,14 @@ description = "你在世纪大道东门"
 compile_sass = true
 minify_html = true
 
-# Whether to build a search index to be used later on by a JavaScript library
 build_search_index = false
-
 generate_feeds = true
 
 [markdown]
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = true
+render_emoji = true
+
+[markdown.highlighting]
+theme = "catppuccin-mocha"
 
 [extra]
 # Put all your custom variables here
@@ -28,3 +27,7 @@ menu = [
 ]
 social = [{ name = "github", url = "https://github.com/antipeth", weight = 1 }]
 toc = true
+tracking_scripts = [
+'<script defer src="https://umami.0pt.dpdns.org/script.js" data-website-id="db91a9df-01cd-4d4c-9a58-46f63001928d"></script>',
+'<script data-goatcounter="https://goatcounter.0pt.dpdns.org/count" async src="//goatcounter.0pt.dpdns.org/count.js"></script>',
+]
